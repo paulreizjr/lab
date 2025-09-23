@@ -1,0 +1,277 @@
+promp
+write fully commented examples of how to use record in c#. comment about: 
+ - the purpose 
+ - scenarios to use
+ - scenarios not to use
+ - memory allocation
+
+
+Target			Version		C# language version default
+.NET			10.x		C# 14
+.NET			9.x			C# 13
+.NET			8.x			C# 12
+.NET			7.x			C# 11
+.NET			6.x			C# 10
+.NET			5.x			C# 9.0
+.NET Core		3.x			C# 8.0
+.NET Core		2.x			C# 7.3
+.NET Standard	2.1			C# 8.0
+.NET Standard	2.0			C# 7.3
+.NET Standard	1.x			C# 7.3
+.NET Framework	all			C# 7.3
+-------------------------------------------------------------------------------------------
+keywords
+// -- modifiers
+abstract // must be implemented
+async
+const
+event
+extern
+in
+new
+out
+override
+readonly
+sealed
+static
+unsafe
+virtual
+volatile
+ref
+params
+// -- 
+// -- access modifiers
+public
+protected
+internal
+private
+file
+// -- 
+// -- statements
+if
+switch
+do
+for
+foreach
+while
+break
+continue
+goto
+return
+throw
+try
+catch
+finally
+checked
+unchecked
+fixed
+lock
+yield
+// -- 
+// -- value types
+bool
+byte
+sbyte
+char
+decimal
+double
+float
+int
+uint
+nint
+nuint
+long
+ulong
+short
+ushort
+enum
+struct
+// --
+// -- reference types
+object
+string
+delegate
+dynamic
+interface
+class
+// --
+as
+base
+case
+default
+else
+explicit
+false
+implicit
+is
+namespace
+null
+operator
+sizeof
+stackalloc
+this
+true
+typeof
+using
+void
+-------------------------------------------------------------------------------------------
+contextual keywords
+add
+allows
+alias
+and
+ascending
+args
+async
+await
+by
+descending
+dynamic
+equals
+extension
+field
+file
+from
+get
+global
+group
+init
+into
+join
+let
+managed (function pointer calling convention)
+nameof
+nint
+not
+notnull
+nuint
+on
+or
+orderby
+partial (type)
+partial (member)
+record
+remove
+required
+scoped
+select
+set
+unmanaged (function pointer calling convention)
+unmanaged (generic type constraint)
+value
+var
+when (filter condition)
+where (generic type constraint)
+where (query clause)
+with
+yield
+-------------------------------------------------------------------------------------------
+Value types
+C# type 	keyword	.NET type
+bool		System.Boolean
+char		System.Char
+sbyte		System.SByte
+byte		System.Byte
+short		System.Int16
+ushort		System.UInt16
+int			System.Int32
+uint		System.UInt32
+long		System.Int64
+ulong		System.UInt64
+nint		System.IntPtr
+nuint		System.UIntPtr
+float		System.Single
+double		System.Double
+decimal		System.Decimal
+struct
+record struct
+enum
+tuple types
+-------------------------------------------------------------------------------------------
+Reference types
+C# type 	keyword	.NET type
+object		System.Object
+string		System.String
+delegate	System.Delegate
+dynamic		System.Object
+class or record class
+interface
+record
+-------------------------------------------------------------------------------------------
+Program structure
+using System;
+namespace YourNamespace
+{
+    class YourClass // reference type
+    {
+    }
+    struct YourStruct // value type
+    {
+    }
+    interface IYourInterface // reference type
+    {
+    }
+    delegate int YourDelegate(); // reference type
+    enum YourEnum // value type 
+    {
+    }
+    namespace YourNestedNamespace
+    {
+        struct YourStruct
+        {
+        }
+    }
+}
+-------------------------------------------------------------------------------------------
+A class can contain declarations of the following members:
+Constructors
+Constants
+Fields
+Finalizers
+Methods
+Properties
+Indexers
+Operators
+Events
+Delegates
+Classes
+Interfaces
+Structure types
+Enumeration types
+-------------------------------------------------------------------------------------------
+An interface may include:
+Constants
+Operators
+Static constructor.
+Nested types
+Static fields, methods, properties, indexers, and events
+Member declarations using the explicit interface implementation syntax.
+-------------------------------------------------------------------------------------------
+Operators
+Operators	Category or name
+x.y, f(x), a[i], x?.y, x?[y], x++, x--, x!, new, typeof, checked, unchecked, default, nameof, delegate, sizeof, stackalloc, x->y	Primary
++x, -x, !x, ~x, ++x, --x, ^x, (T)x, await, &x, *x, true and false	Unary
+x..y	Range
+.. collection	Spread
+^	Index from end operator
+switch, with	switch and with expressions
+x * y, x / y, x % y	Multiplicative
+x + y, x – y	Additive
+x << y, x >> y, x >>> y	Shift
+x < y, x > y, x <= y, x >= y, is, as	Relational and type-testing
+x == y, x != y	Equality
+x & y	Boolean logical AND or bitwise logical AND
+x ^ y	Boolean logical XOR or bitwise logical XOR
+x | y	Boolean logical OR or bitwise logical OR
+x && y	Conditional AND
+x || y	Conditional OR
+x ?? y	Null-coalescing operator
+c ? t : f	Conditional operator
+x = y, x += y, x -= y, x *= y, x /= y, x %= y, x &= y, x |= y, x ^= y, x <<= y, x >>= y, x >>>= y, x ??= y, =>	Assignment and lambda declaration
+-------------------------------------------------------------------------------------------
+Special Characteres
+@, the verbatim identifier character.
+$, the interpolated string character.
+""", A sequence of three or more " characters provides the delimiters for a raw string literal.
+_, a _ character represents a discard, which is a placeholder for an unused variable.
+-------------------------------------------------------------------------------------------
