@@ -276,6 +276,14 @@ class Program
         {
             // Check if cancellation was requested
             // This is the cooperative part - the operation voluntarily checks and responds
+
+            // how does it work internally?
+            // When ThrowIfCancellationRequested is called, it checks the IsCancellationRequested property
+            // of the CancellationToken. If cancellation has been requested, it throws an OperationCanceledException.
+            // what sets IsCancellationRequested to true?
+            // IsCancellationRequested is set to true when the Cancel method is called on the associated CancellationTokenSource.
+            // what calls Cancel?
+            // Cancel can be called manually by the developer, or it can be triggered automatically if a timeout is set on the CancellationTokenSource.
             cancellationToken.ThrowIfCancellationRequested();
             
             // Simulate work
