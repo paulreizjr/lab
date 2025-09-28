@@ -73,7 +73,50 @@ namespace AsyncExamples
 
             // This simulates I/O work without blocking the current thread
             string result = await SimulateAsyncWork("Database Query", 2000);
-            
+
+            /*
+             * WHAT HAPPENS DURING AWAIT:
+             * 
+             * 1. YIELD CONTROL: When await is encountered, the method yields control back to caller
+             * 2. STATE MACHINE: The async method is transformed into a state machine by compiler
+             * 3. CONTINUATION: Code after await becomes a continuation (delegate) that runs when task completes
+             * 4. THREAD FREEDOM: The original thread is freed to do other work while waiting
+             * 5. CONTEXT RESUMPTION: When task completes, continuation resumes on appropriate context
+             */
+
+            /*
+             * .NET THREAD POOL OVERVIEW:
+             * 
+             * WHAT IS IT?
+             * - Managed pool of worker threads for executing tasks and background work
+             * - Eliminates overhead of creating/destroying threads manually
+             * - Handles asynchronous I/O operations and queued work items
+             * 
+             * HOW IT WORKS:
+             * - Maintains reusable worker threads that handle multiple tasks
+             * - Assigns queued tasks to available threads
+             * - Creates new threads (up to limits) when all threads are busy
+             * - Automatically manages thread lifecycle and resource allocation
+             * 
+             * DEFAULT SIZING:
+             * - Minimum threads: Typically equals number of CPU cores
+             * - Maximum threads: Often 1024+ (depends on system resources)
+             * - Configurable via ThreadPool.SetMinThreads/SetMaxThreads
+             */
+
+            /*
+             * CONTINUATION EXECUTION:
+             * 
+             * WHERE DOES THE CODE BELOW RUN?
+             * - During await: Original thread is released, can do other work
+             * - After completion: Continuation scheduled on thread pool thread
+             * - Context matters: May resume on UI thread (with SynchronizationContext)
+             *                   or on any thread pool thread (without context)
+             * 
+             * The code below this comment runs as a continuation on whatever thread
+             * the thread pool assigns when the awaited task completes.
+             */
+
             stopwatch.Stop();
             Console.WriteLine($"Result: {result}");
             Console.WriteLine($"Total time: {stopwatch.ElapsedMilliseconds}ms");
@@ -107,6 +150,8 @@ namespace AsyncExamples
             stopwatch.Restart();
             Console.WriteLine("\nConcurrent execution:");
             
+            // each task below goes to the thread pool and runs in parallel
+
             Task<string> task1 = SimulateAsyncWork("API Call 1", 1000);
             Task<string> task2 = SimulateAsyncWork("API Call 2", 1000);
             Task<string> task3 = SimulateAsyncWork("API Call 3", 1000);
@@ -177,16 +222,52 @@ namespace AsyncExamples
             Console.WriteLine("--- ConfigureAwait Example ---");
             
             /*
-             * CONFIGUREAWAIT(FALSE):
-             * - By default, await captures current synchronization context
-             * - In UI apps, this means returning to UI thread after await
-             * - In libraries, use ConfigureAwait(false) to avoid deadlocks
-             * - Improves performance by not switching back to original context
+             * CONFIGUREAWAIT DETAILED EXPLANATION:
+             * 
+             * WHAT IS SYNCHRONIZATION CONTEXT?
+             * - A mechanism that controls WHERE continuations (code after await) execute
+             * - Different contexts: UI thread (WPF/WinForms), ASP.NET context, thread pool context
+             * - Captured automatically by await to maintain thread affinity when needed
+             * 
+             * DEFAULT BEHAVIOR (ConfigureAwait(true) or no ConfigureAwait):
+             * - await captures the current SynchronizationContext or TaskScheduler
+             * - Continuation runs on the SAME context (e.g., UI thread returns to UI thread)
+             * - Ensures UI updates happen on UI thread, maintains request context in web apps
+             * 
+             * WITH CONFIGUREAWAIT(FALSE):
+             * - Tells await: "I don't care what thread the continuation runs on"
+             * - Continuation may run on any available thread pool thread
+             * - Faster because no context switching overhead
+             * - BUT: Cannot safely update UI or access context-specific resources
+             *   context-specific resources samples: UI elements, HttpContext, etc.
+             * 
+             * WHEN TO USE CONFIGUREAWAIT(FALSE):
+             * ✅ Library code that doesn't need specific thread context
+             * ✅ Background processing that doesn't touch UI
+             * ✅ Performance-critical code where context switching is expensive
+             * ✅ Code that might be called from UI thread (prevents deadlocks)
+             * 
+             * WHEN NOT TO USE CONFIGUREAWAIT(FALSE):
+             * ❌ UI event handlers that need to update UI after await
+             * ❌ ASP.NET controllers that need HttpContext after await
+             * ❌ Code that accesses thread-specific resources after await
+             * 
+             * DEADLOCK PREVENTION:
+             * - Classic deadlock: UI thread waits for async operation that tries to resume on
+             *   busy UI thread
+             * - ConfigureAwait(false) breaks this cycle by not requiring original thread
+             * 
+             * PERFORMANCE IMPACT:
+             * - Context switching can add 10-100+ microseconds per await
+             * - In high-throughput scenarios, this adds up significantly
+             * - ConfigureAwait(false) eliminates this overhead
              */
 
             Console.WriteLine("Demonstrating ConfigureAwait usage:");
-            
+
             // In library code, always use ConfigureAwait(false)
+            // by library code I mean code that could be used by any application, like a NuGet package or shared utility
+
             await PerformLibraryOperation().ConfigureAwait(false);
             
             // In application code, you can omit ConfigureAwait or use true
@@ -251,7 +332,9 @@ namespace AsyncExamples
              * - File operations
              * - Network requests
              */
-            await Task.Delay(delayMs);
+            await Task.Delay(delayMs); // does this cause the task to go back to the thread pool? 
+            // yes, it does. Task.Delay uses a timer internally and when the timer completes, it queues the continuation to the thread pool. 
+            // This allows the current thread to be freed up while waiting for the delay to complete.
             return $"{operation} completed";
         }
 
