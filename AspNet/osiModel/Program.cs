@@ -32,6 +32,8 @@ namespace osiModel;
 
 // 🔑 KEY NETWORKING TERMS:
 // • Port - Like a mailbox for network traffic (e.g., 80=HTTP, 443=HTTPS)
+//   this is handled by the operating system
+// • IP Address - Unique identifier for devices on a network (IPv4 or IPv6)
 // • RTT (Round-Trip Time) - Time for signal to go client→server→back
 // • Hop - Step in data path from source to destination (router to router)
 // • Gateway - Local router connecting to wider internet
@@ -56,6 +58,7 @@ namespace osiModel;
 //    • Enables offline support, background sync, push notifications
 //    • Registered for specific URL patterns/scopes
 //    • Uses Cache API for fine-grained caching control
+//    TODO: understand this better
 
 // 2️⃣ HTTP CACHE:
 //    • Stores previous responses to speed up repeated requests
@@ -116,7 +119,7 @@ namespace osiModel;
 // 🏠 LOCAL NETWORK MAPPING:
 // • ARP (Address Resolution Protocol) - Maps IPv4 addresses to MAC addresses
 // • NDP (Neighbor Discovery Protocol) - IPv6 equivalent of ARP
-// • Client resolves MAC address of gateway (local router)
+// • Client resolves MAC address of default gateway (local router)
 // • Creates Ethernet frames for next hop transmission
 
 // =====================================================================================
