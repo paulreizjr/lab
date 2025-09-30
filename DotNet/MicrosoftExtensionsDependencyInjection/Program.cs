@@ -13,6 +13,8 @@
  * - ServiceProvider: Default implementation for service resolution
  * - ServiceDescriptor: Describes how a service should be registered
  * - ServiceLifetime: Enum defining service lifetimes (Singleton, Scoped, Transient)
+ * - IHttpClientFactory: Factory for creating configured HttpClient instances
+ * - HttpClient: HTTP client instances managed by the DI container
  * 
  * SCENARIOS TO USE:
  * 1. Loose coupling between classes and their dependencies
@@ -29,6 +31,10 @@
  * 12. Multi-tenant applications
  * 13. Microservices with shared abstractions
  * 14. Clean architecture implementations
+ * 15. HttpClient management and configuration
+ * 16. REST API consumption and external service integration
+ * 17. HTTP middleware pipelines (logging, retry, authentication)
+ * 18. Named and typed HttpClient patterns
  * 
  * SCENARIOS NOT TO USE:
  * 1. Simple utilities with no dependencies (static classes)
@@ -62,13 +68,15 @@
  */
 
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Http;
 using System.Text.Json;
+using System.Text;
 
 namespace MicrosoftExtensionsDependencyInjectionExamples
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             Console.WriteLine("=== Microsoft.Extensions.DependencyInjection Namespace Examples ===\n");
 
@@ -120,6 +128,22 @@ namespace MicrosoftExtensionsDependencyInjectionExamples
 
                 // Example 12: Performance comparison and best practices
                 PerformanceComparisonExample();
+                Console.WriteLine();
+
+                // Example 13: HttpClient dependency injection with AddHttpClient
+                await HttpClientDependencyInjectionExample();
+                Console.WriteLine();
+
+                // Example 14: Named HttpClient patterns
+                await NamedHttpClientExample();
+                Console.WriteLine();
+
+                // Example 15: Typed HttpClient patterns
+                await TypedHttpClientExample();
+                Console.WriteLine();
+
+                // Example 16: HttpClient with custom handlers and middleware
+                await HttpClientMiddlewareExample();
                 Console.WriteLine();
             }
             catch (Exception ex)
@@ -869,6 +893,352 @@ namespace MicrosoftExtensionsDependencyInjectionExamples
             Console.WriteLine("- Always dispose ServiceProvider when done");
             Console.WriteLine("- Be careful with capturing references to scoped services");
             Console.WriteLine("- Consider factory patterns for complex object creation");
+        }
+
+        /*
+         * EXAMPLE 13: HttpClient Dependency Injection with AddHttpClient
+         * 
+         * PURPOSE: Demonstrates various patterns for registering and using HttpClient with DI
+         * 
+         * SCENARIOS TO USE:
+         * - REST API consumption
+         * - Microservices communication
+         * - External service integration
+         * - Centralized HTTP configuration
+         * 
+         * MEMORY ALLOCATION:
+         * - HttpClientFactory: ~2-5KB base overhead
+         * - Named clients: ~1KB per named configuration
+         * - Typed clients: ~500B-2KB per typed client
+         * - Connection pooling: Managed automatically by HttpClientFactory
+         * - Handler pipeline: ~100-500B per handler
+         */
+        private static async Task HttpClientDependencyInjectionExample()
+        {
+            Console.WriteLine("13. HttpClient Dependency Injection with AddHttpClient Example");
+            Console.WriteLine("==============================================================");
+
+            var services = new ServiceCollection();
+
+            // Basic HttpClient registration
+            services.AddHttpClient();
+
+            // Register basic HttpClient-consuming service
+            services.AddTransient<BasicHttpService>();
+
+            // Register logger for demonstration
+            services.AddSingleton<ILogger, ConsoleLogger>();
+
+            using var serviceProvider = services.BuildServiceProvider();
+
+            Console.WriteLine("=== Basic HttpClient Registration ===");
+            
+            // The service will receive a properly configured HttpClient
+            var httpService = serviceProvider.GetRequiredService<BasicHttpService>();
+            
+            try
+            {
+                await httpService.GetDataAsync();
+                await httpService.PostDataAsync(new { message = "Hello from DI!" });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"HTTP operation failed: {ex.Message}");
+            }
+
+            Console.WriteLine("\n=== HttpClient Configuration ===");
+            
+            // Show how to configure the default HttpClient
+            var configuredServices = new ServiceCollection();
+            
+            configuredServices.AddHttpClient<ConfiguredHttpService>(client =>
+            {
+                client.BaseAddress = new Uri("https://jsonplaceholder.typicode.com/");
+                client.DefaultRequestHeaders.Add("User-Agent", "DI-Example/1.0");
+                client.Timeout = TimeSpan.FromSeconds(30);
+            });
+
+            configuredServices.AddSingleton<ILogger, ConsoleLogger>();
+
+            using var configuredProvider = configuredServices.BuildServiceProvider();
+            var configuredHttpService = configuredProvider.GetRequiredService<ConfiguredHttpService>();
+            
+            try
+            {
+                await configuredHttpService.GetPostAsync(1);
+                await configuredHttpService.GetUsersAsync();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Configured HTTP operation failed: {ex.Message}");
+            }
+        }
+
+        /*
+         * EXAMPLE 14: Named HttpClient Patterns
+         * 
+         * PURPOSE: Demonstrates named HttpClient registration for different services/APIs
+         * 
+         * SCENARIOS TO USE:
+         * - Multiple external APIs with different configurations
+         * - Different authentication schemes per service
+         * - Service-specific timeouts and headers
+         * - API versioning strategies
+         * 
+         * MEMORY ALLOCATION:
+         * - Each named client: ~1-2KB configuration overhead
+         * - Shared connection pools when possible
+         * - Handler instances shared across requests
+         */
+        private static async Task NamedHttpClientExample()
+        {
+            Console.WriteLine("14. Named HttpClient Patterns Example");
+            Console.WriteLine("=====================================");
+
+            var services = new ServiceCollection();
+
+            // Register named HttpClients for different services
+            services.AddHttpClient("github", client =>
+            {
+                client.BaseAddress = new Uri("https://api.github.com/");
+                client.DefaultRequestHeaders.Add("User-Agent", "DI-Example-App");
+                client.DefaultRequestHeaders.Add("Accept", "application/vnd.github.v3+json");
+                client.Timeout = TimeSpan.FromSeconds(30);
+            });
+
+            services.AddHttpClient("jsonplaceholder", client =>
+            {
+                client.BaseAddress = new Uri("https://jsonplaceholder.typicode.com/");
+                client.DefaultRequestHeaders.Add("User-Agent", "DI-Example-App");
+                client.Timeout = TimeSpan.FromSeconds(15);
+            });
+
+            services.AddHttpClient("httpbin", client =>
+            {
+                client.BaseAddress = new Uri("https://httpbin.org/");
+                client.DefaultRequestHeaders.Add("X-Custom-Header", "Named-Client-Example");
+                client.Timeout = TimeSpan.FromSeconds(10);
+            });
+
+            // Register services that use named clients
+            services.AddTransient<GitHubApiService>();
+            services.AddTransient<JsonPlaceholderService>();
+            services.AddTransient<HttpBinService>();
+            services.AddSingleton<ILogger, ConsoleLogger>();
+
+            using var serviceProvider = services.BuildServiceProvider();
+
+            Console.WriteLine("=== GitHub API Service ===");
+            var githubService = serviceProvider.GetRequiredService<GitHubApiService>();
+            try
+            {
+                await githubService.GetUserInfoAsync("octocat");
+                await githubService.GetRepositoriesAsync("microsoft");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"GitHub API error: {ex.Message}");
+            }
+
+            Console.WriteLine("\n=== JSON Placeholder Service ===");
+            var jsonPlaceholderService = serviceProvider.GetRequiredService<JsonPlaceholderService>();
+            try
+            {
+                await jsonPlaceholderService.GetPostsAsync();
+                await jsonPlaceholderService.CreatePostAsync("Test Title", "Test Body", 1);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"JSON Placeholder error: {ex.Message}");
+            }
+
+            Console.WriteLine("\n=== HTTP Bin Service ===");
+            var httpBinService = serviceProvider.GetRequiredService<HttpBinService>();
+            try
+            {
+                await httpBinService.TestHeadersAsync();
+                await httpBinService.TestDelayAsync(2);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"HTTP Bin error: {ex.Message}");
+            }
+        }
+
+        /*
+         * EXAMPLE 15: Typed HttpClient Patterns
+         * 
+         * PURPOSE: Demonstrates typed HttpClient pattern for strongly-typed API clients
+         * 
+         * SCENARIOS TO USE:
+         * - Strongly-typed API clients
+         * - Encapsulating API-specific logic
+         * - Better testability with interfaces
+         * - Cleaner service dependencies
+         * 
+         * MEMORY ALLOCATION:
+         * - Typed client instance: ~500B-2KB per client
+         * - HttpClient injection: Managed by factory (no additional overhead)
+         * - Better memory efficiency than multiple named clients
+         */
+        private static async Task TypedHttpClientExample()
+        {
+            Console.WriteLine("15. Typed HttpClient Patterns Example");
+            Console.WriteLine("=====================================");
+
+            var services = new ServiceCollection();
+
+            // Register typed HttpClients with interfaces
+            services.AddHttpClient<IWeatherService, WeatherApiClient>(client =>
+            {
+                client.BaseAddress = new Uri("https://api.openweathermap.org/data/2.5/");
+                client.DefaultRequestHeaders.Add("User-Agent", "Weather-App/1.0");
+                // In real app, you'd use configuration for API key
+                // client.DefaultRequestHeaders.Add("Authorization", $"Bearer {apiKey}");
+            });
+
+            services.AddHttpClient<INewsService, NewsApiClient>(client =>
+            {
+                client.BaseAddress = new Uri("https://newsapi.org/v2/");
+                client.DefaultRequestHeaders.Add("User-Agent", "News-Reader/1.0");
+                client.Timeout = TimeSpan.FromSeconds(20);
+            });
+
+            // Register a service that uses typed clients
+            services.AddTransient<DashboardService>();
+            services.AddSingleton<ILogger, ConsoleLogger>();
+
+            using var serviceProvider = services.BuildServiceProvider();
+
+            Console.WriteLine("=== Direct Typed Client Usage ===");
+            
+            // Use typed clients directly
+            var weatherService = serviceProvider.GetRequiredService<IWeatherService>();
+            var newsService = serviceProvider.GetRequiredService<INewsService>();
+
+            try
+            {
+                await weatherService.GetCurrentWeatherAsync("London");
+                await weatherService.GetForecastAsync("New York", 5);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Weather service error: {ex.Message}");
+            }
+
+            try
+            {
+                await newsService.GetTopHeadlinesAsync("technology");
+                await newsService.SearchArticlesAsync("artificial intelligence");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"News service error: {ex.Message}");
+            }
+
+            Console.WriteLine("\n=== Composed Service Using Typed Clients ===");
+            
+            // Use a service that composes multiple typed clients
+            var dashboardService = serviceProvider.GetRequiredService<DashboardService>();
+            try
+            {
+                await dashboardService.LoadDashboardDataAsync("San Francisco");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Dashboard service error: {ex.Message}");
+            }
+        }
+
+        /*
+         * EXAMPLE 16: HttpClient with Custom Handlers and Middleware
+         * 
+         * PURPOSE: Demonstrates custom message handlers for cross-cutting concerns
+         * 
+         * SCENARIOS TO USE:
+         * - Request/response logging
+         * - Retry policies
+         * - Authentication token refresh
+         * - Request/response transformation
+         * - Caching strategies
+         * - Rate limiting
+         * 
+         * MEMORY ALLOCATION:
+         * - Each handler: ~200-500B overhead
+         * - Handler pipeline: Executed in order
+         * - Shared across all requests for efficiency
+         */
+        private static async Task HttpClientMiddlewareExample()
+        {
+            Console.WriteLine("16. HttpClient with Custom Handlers and Middleware Example");
+            Console.WriteLine("==========================================================");
+
+            var services = new ServiceCollection();
+
+            // Register handlers as services so they can use DI
+            services.AddTransient<LoggingHandler>();
+            services.AddTransient<RetryHandler>();
+            services.AddTransient<TimingHandler>();
+
+            // Register HttpClient with custom handler pipeline
+            services.AddHttpClient<IResilientApiClient, ResilientApiClient>(client =>
+            {
+                client.BaseAddress = new Uri("https://jsonplaceholder.typicode.com/");
+                client.Timeout = TimeSpan.FromSeconds(30);
+            })
+            .AddHttpMessageHandler<TimingHandler>()      // Outermost handler (executes first)
+            .AddHttpMessageHandler<LoggingHandler>()     // Middle handler
+            .AddHttpMessageHandler<RetryHandler>();      // Innermost handler (closest to HttpClient)
+
+            // Register another client with different handler configuration
+            services.AddHttpClient("fast-api", client =>
+            {
+                client.BaseAddress = new Uri("https://httpbin.org/");
+                client.Timeout = TimeSpan.FromSeconds(10);
+            })
+            .AddHttpMessageHandler<TimingHandler>()
+            .AddHttpMessageHandler<LoggingHandler>();
+
+            services.AddTransient<FastApiService>();
+            services.AddSingleton<ILogger, ConsoleLogger>();
+
+            using var serviceProvider = services.BuildServiceProvider();
+
+            Console.WriteLine("=== Resilient API Client (with retry) ===");
+            var resilientClient = serviceProvider.GetRequiredService<IResilientApiClient>();
+            
+            try
+            {
+                await resilientClient.GetDataWithRetryAsync("posts/1");
+                await resilientClient.GetDataWithRetryAsync("posts/999"); // This might fail and retry
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Resilient client error: {ex.Message}");
+            }
+
+            Console.WriteLine("\n=== Fast API Service (with timing and logging) ===");
+            var fastApiService = serviceProvider.GetRequiredService<FastApiService>();
+            
+            try
+            {
+                await fastApiService.GetStatusAsync();
+                await fastApiService.TestDelayAsync(1);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Fast API service error: {ex.Message}");
+            }
+
+            Console.WriteLine("\n=== Handler Pipeline Demonstration ===");
+            Console.WriteLine("Handler execution order:");
+            Console.WriteLine("1. TimingHandler (starts timer)");
+            Console.WriteLine("2. LoggingHandler (logs request)");
+            Console.WriteLine("3. RetryHandler (handles retries)");
+            Console.WriteLine("4. HttpClient (actual HTTP call)");
+            Console.WriteLine("5. RetryHandler (processes response)");
+            Console.WriteLine("6. LoggingHandler (logs response)");
+            Console.WriteLine("7. TimingHandler (stops timer)");
         }
     }
 
@@ -1764,6 +2134,516 @@ namespace MicrosoftExtensionsDependencyInjectionExamples
         public void DoWork()
         {
             Console.WriteLine("[SELF-REGISTERING] Doing important work");
+        }
+    }
+
+    #endregion
+
+    #region HttpClient Services and Implementations
+
+    // Basic HttpClient service
+    public class BasicHttpService
+    {
+        private readonly HttpClient _httpClient;
+        private readonly ILogger _logger;
+
+        public BasicHttpService(HttpClient httpClient, ILogger logger)
+        {
+            _httpClient = httpClient;
+            _logger = logger;
+        }
+
+        public async Task GetDataAsync()
+        {
+            try
+            {
+                var response = await _httpClient.GetStringAsync("https://jsonplaceholder.typicode.com/posts/1");
+                _logger.Log($"[BASIC HTTP] Retrieved {response.Length} characters");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"[BASIC HTTP] GET failed: {ex.Message}");
+            }
+        }
+
+        public async Task PostDataAsync(object data)
+        {
+            try
+            {
+                var json = JsonSerializer.Serialize(data);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+                var response = await _httpClient.PostAsync("https://jsonplaceholder.typicode.com/posts", content);
+                
+                _logger.Log($"[BASIC HTTP] POST response: {response.StatusCode}");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"[BASIC HTTP] POST failed: {ex.Message}");
+            }
+        }
+    }
+
+    // Configured HttpClient service
+    public class ConfiguredHttpService
+    {
+        private readonly HttpClient _httpClient;
+        private readonly ILogger _logger;
+
+        public ConfiguredHttpService(HttpClient httpClient, ILogger logger)
+        {
+            _httpClient = httpClient;
+            _logger = logger;
+        }
+
+        public async Task GetPostAsync(int id)
+        {
+            try
+            {
+                // BaseAddress is already configured, so we use relative URL
+                var response = await _httpClient.GetStringAsync($"posts/{id}");
+                _logger.Log($"[CONFIGURED HTTP] Retrieved post {id}: {response.Length} characters");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"[CONFIGURED HTTP] GET post {id} failed: {ex.Message}");
+            }
+        }
+
+        public async Task GetUsersAsync()
+        {
+            try
+            {
+                var response = await _httpClient.GetStringAsync("users");
+                _logger.Log($"[CONFIGURED HTTP] Retrieved users: {response.Length} characters");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"[CONFIGURED HTTP] GET users failed: {ex.Message}");
+            }
+        }
+    }
+
+    // Named HttpClient services
+    public class GitHubApiService
+    {
+        private readonly HttpClient _httpClient;
+        private readonly ILogger _logger;
+
+        public GitHubApiService(IHttpClientFactory httpClientFactory, ILogger logger)
+        {
+            _httpClient = httpClientFactory.CreateClient("github");
+            _logger = logger;
+        }
+
+        public async Task GetUserInfoAsync(string username)
+        {
+            try
+            {
+                var response = await _httpClient.GetStringAsync($"users/{username}");
+                _logger.Log($"[GITHUB API] Retrieved user {username}: {response.Length} characters");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"[GITHUB API] GET user {username} failed: {ex.Message}");
+            }
+        }
+
+        public async Task GetRepositoriesAsync(string owner)
+        {
+            try
+            {
+                var response = await _httpClient.GetStringAsync($"users/{owner}/repos");
+                _logger.Log($"[GITHUB API] Retrieved repos for {owner}: {response.Length} characters");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"[GITHUB API] GET repos for {owner} failed: {ex.Message}");
+            }
+        }
+    }
+
+    public class JsonPlaceholderService
+    {
+        private readonly HttpClient _httpClient;
+        private readonly ILogger _logger;
+
+        public JsonPlaceholderService(IHttpClientFactory httpClientFactory, ILogger logger)
+        {
+            _httpClient = httpClientFactory.CreateClient("jsonplaceholder");
+            _logger = logger;
+        }
+
+        public async Task GetPostsAsync()
+        {
+            try
+            {
+                var response = await _httpClient.GetStringAsync("posts");
+                _logger.Log($"[JSON PLACEHOLDER] Retrieved posts: {response.Length} characters");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"[JSON PLACEHOLDER] GET posts failed: {ex.Message}");
+            }
+        }
+
+        public async Task CreatePostAsync(string title, string body, int userId)
+        {
+            try
+            {
+                var postData = new { title, body, userId };
+                var json = JsonSerializer.Serialize(postData);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+                
+                var response = await _httpClient.PostAsync("posts", content);
+                _logger.Log($"[JSON PLACEHOLDER] Created post: {response.StatusCode}");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"[JSON PLACEHOLDER] POST failed: {ex.Message}");
+            }
+        }
+    }
+
+    public class HttpBinService
+    {
+        private readonly HttpClient _httpClient;
+        private readonly ILogger _logger;
+
+        public HttpBinService(IHttpClientFactory httpClientFactory, ILogger logger)
+        {
+            _httpClient = httpClientFactory.CreateClient("httpbin");
+            _logger = logger;
+        }
+
+        public async Task TestHeadersAsync()
+        {
+            try
+            {
+                var response = await _httpClient.GetStringAsync("headers");
+                _logger.Log($"[HTTP BIN] Headers test: {response.Length} characters");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"[HTTP BIN] Headers test failed: {ex.Message}");
+            }
+        }
+
+        public async Task TestDelayAsync(int seconds)
+        {
+            try
+            {
+                var response = await _httpClient.GetStringAsync($"delay/{seconds}");
+                _logger.Log($"[HTTP BIN] Delay test ({seconds}s): {response.Length} characters");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"[HTTP BIN] Delay test failed: {ex.Message}");
+            }
+        }
+    }
+
+    // Typed HttpClient interfaces and implementations
+    public interface IWeatherService
+    {
+        Task GetCurrentWeatherAsync(string city);
+        Task GetForecastAsync(string city, int days);
+    }
+
+    public class WeatherApiClient : IWeatherService
+    {
+        private readonly HttpClient _httpClient;
+        private readonly ILogger _logger;
+
+        public WeatherApiClient(HttpClient httpClient, ILogger logger)
+        {
+            _httpClient = httpClient;
+            _logger = logger;
+        }
+
+        public async Task GetCurrentWeatherAsync(string city)
+        {
+            try
+            {
+                // In a real app, you'd use actual API endpoints and API keys
+                _logger.Log($"[WEATHER API] Simulating current weather for {city}");
+                // var response = await _httpClient.GetStringAsync($"weather?q={city}&appid={apiKey}");
+                await Task.Delay(100); // Simulate API call
+                _logger.Log($"[WEATHER API] Current weather for {city}: Sunny, 22°C");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"[WEATHER API] Current weather failed: {ex.Message}");
+            }
+        }
+
+        public async Task GetForecastAsync(string city, int days)
+        {
+            try
+            {
+                _logger.Log($"[WEATHER API] Simulating {days}-day forecast for {city}");
+                await Task.Delay(150); // Simulate API call
+                _logger.Log($"[WEATHER API] {days}-day forecast for {city}: Mixed conditions");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"[WEATHER API] Forecast failed: {ex.Message}");
+            }
+        }
+    }
+
+    public interface INewsService
+    {
+        Task GetTopHeadlinesAsync(string category);
+        Task SearchArticlesAsync(string query);
+    }
+
+    public class NewsApiClient : INewsService
+    {
+        private readonly HttpClient _httpClient;
+        private readonly ILogger _logger;
+
+        public NewsApiClient(HttpClient httpClient, ILogger logger)
+        {
+            _httpClient = httpClient;
+            _logger = logger;
+        }
+
+        public async Task GetTopHeadlinesAsync(string category)
+        {
+            try
+            {
+                _logger.Log($"[NEWS API] Simulating top headlines for {category}");
+                await Task.Delay(120); // Simulate API call
+                _logger.Log($"[NEWS API] Retrieved 10 headlines for {category}");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"[NEWS API] Top headlines failed: {ex.Message}");
+            }
+        }
+
+        public async Task SearchArticlesAsync(string query)
+        {
+            try
+            {
+                _logger.Log($"[NEWS API] Simulating search for '{query}'");
+                await Task.Delay(100); // Simulate API call
+                _logger.Log($"[NEWS API] Found 25 articles for '{query}'");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"[NEWS API] Search failed: {ex.Message}");
+            }
+        }
+    }
+
+    // Service that composes multiple typed clients
+    public class DashboardService
+    {
+        private readonly IWeatherService _weatherService;
+        private readonly INewsService _newsService;
+        private readonly ILogger _logger;
+
+        public DashboardService(
+            IWeatherService weatherService,
+            INewsService newsService,
+            ILogger logger)
+        {
+            _weatherService = weatherService;
+            _newsService = newsService;
+            _logger = logger;
+        }
+
+        public async Task LoadDashboardDataAsync(string city)
+        {
+            _logger.Log($"[DASHBOARD] Loading dashboard data for {city}");
+
+            // Load data from multiple services in parallel
+            var weatherTask = _weatherService.GetCurrentWeatherAsync(city);
+            var forecastTask = _weatherService.GetForecastAsync(city, 7);
+            var headlinesTask = _newsService.GetTopHeadlinesAsync("general");
+            var techNewsTask = _newsService.SearchArticlesAsync("technology");
+
+            await Task.WhenAll(weatherTask, forecastTask, headlinesTask, techNewsTask);
+
+            _logger.Log("[DASHBOARD] Dashboard data loaded successfully");
+        }
+    }
+
+    // Custom message handlers
+    public class LoggingHandler : DelegatingHandler
+    {
+        private readonly ILogger _logger;
+
+        public LoggingHandler(ILogger logger)
+        {
+            _logger = logger;
+        }
+
+        protected override async Task<HttpResponseMessage> SendAsync(
+            HttpRequestMessage request,
+            CancellationToken cancellationToken)
+        {
+            _logger.Log($"[LOGGING HANDLER] Request: {request.Method} {request.RequestUri}");
+            
+            var response = await base.SendAsync(request, cancellationToken);
+            
+            _logger.Log($"[LOGGING HANDLER] Response: {response.StatusCode} ({response.Content?.Headers?.ContentLength ?? 0} bytes)");
+            
+            return response;
+        }
+    }
+
+    public class RetryHandler : DelegatingHandler
+    {
+        private readonly ILogger _logger;
+        private const int MaxRetries = 3;
+
+        public RetryHandler(ILogger logger)
+        {
+            _logger = logger;
+        }
+
+        protected override async Task<HttpResponseMessage> SendAsync(
+            HttpRequestMessage request,
+            CancellationToken cancellationToken)
+        {
+            var attempt = 0;
+            
+            while (attempt < MaxRetries)
+            {
+                try
+                {
+                    var response = await base.SendAsync(request, cancellationToken);
+                    
+                    // Retry on server errors (5xx) or client timeout
+                    if ((int)response.StatusCode >= 500 || response.StatusCode == System.Net.HttpStatusCode.RequestTimeout)
+                    {
+                        if (attempt < MaxRetries - 1)
+                        {
+                            _logger.Log($"[RETRY HANDLER] Attempt {attempt + 1} failed with {response.StatusCode}, retrying...");
+                            attempt++;
+                            await Task.Delay(TimeSpan.FromSeconds(Math.Pow(2, attempt)), cancellationToken); // Exponential backoff
+                            continue;
+                        }
+                    }
+                    
+                    return response;
+                }
+                catch (HttpRequestException ex) when (attempt < MaxRetries - 1)
+                {
+                    _logger.LogError($"[RETRY HANDLER] Attempt {attempt + 1} failed: {ex.Message}, retrying...");
+                    attempt++;
+                    await Task.Delay(TimeSpan.FromSeconds(Math.Pow(2, attempt)), cancellationToken);
+                }
+            }
+            
+            // If we get here, all retries failed
+            throw new HttpRequestException($"Request failed after {MaxRetries} attempts");
+        }
+    }
+
+    public class TimingHandler : DelegatingHandler
+    {
+        private readonly ILogger _logger;
+
+        public TimingHandler(ILogger logger)
+        {
+            _logger = logger;
+        }
+
+        protected override async Task<HttpResponseMessage> SendAsync(
+            HttpRequestMessage request,
+            CancellationToken cancellationToken)
+        {
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+            
+            try
+            {
+                var response = await base.SendAsync(request, cancellationToken);
+                stopwatch.Stop();
+                
+                _logger.Log($"[TIMING HANDLER] Request completed in {stopwatch.ElapsedMilliseconds}ms");
+                
+                return response;
+            }
+            catch
+            {
+                stopwatch.Stop();
+                _logger.Log($"[TIMING HANDLER] Request failed after {stopwatch.ElapsedMilliseconds}ms");
+                throw;
+            }
+        }
+    }
+
+    // Resilient API client interface and implementation
+    public interface IResilientApiClient
+    {
+        Task GetDataWithRetryAsync(string endpoint);
+    }
+
+    public class ResilientApiClient : IResilientApiClient
+    {
+        private readonly HttpClient _httpClient;
+        private readonly ILogger _logger;
+
+        public ResilientApiClient(HttpClient httpClient, ILogger logger)
+        {
+            _httpClient = httpClient;
+            _logger = logger;
+        }
+
+        public async Task GetDataWithRetryAsync(string endpoint)
+        {
+            try
+            {
+                var response = await _httpClient.GetStringAsync(endpoint);
+                _logger.Log($"[RESILIENT CLIENT] Retrieved data from {endpoint}: {response.Length} characters");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"[RESILIENT CLIENT] Failed to get data from {endpoint}: {ex.Message}");
+                throw;
+            }
+        }
+    }
+
+    // Fast API service (with minimal handlers)
+    public class FastApiService
+    {
+        private readonly HttpClient _httpClient;
+        private readonly ILogger _logger;
+
+        public FastApiService(IHttpClientFactory httpClientFactory, ILogger logger)
+        {
+            _httpClient = httpClientFactory.CreateClient("fast-api");
+            _logger = logger;
+        }
+
+        public async Task GetStatusAsync()
+        {
+            try
+            {
+                var response = await _httpClient.GetStringAsync("status/200");
+                _logger.Log($"[FAST API] Status check: {response.Length} characters");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"[FAST API] Status check failed: {ex.Message}");
+            }
+        }
+
+        public async Task TestDelayAsync(int seconds)
+        {
+            try
+            {
+                var response = await _httpClient.GetStringAsync($"delay/{seconds}");
+                _logger.Log($"[FAST API] Delay test ({seconds}s): {response.Length} characters");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"[FAST API] Delay test failed: {ex.Message}");
+            }
         }
     }
 
