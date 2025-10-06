@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36414.22
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SystemNetHttp.Tests", "SystemNetHttp.Tests.csproj", "{0C779346-4A82-B542-5A15-4437939767C7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SystemNetHttp", "..\SystemNetHttp\SystemNetHttp.csproj", "{4F93475D-653E-EE92-AFDB-CF1B8ECB9BFC}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0C779346-4A82-B542-5A15-4437939767C7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0C779346-4A82-B542-5A15-4437939767C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0C779346-4A82-B542-5A15-4437939767C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0C779346-4A82-B542-5A15-4437939767C7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4F93475D-653E-EE92-AFDB-CF1B8ECB9BFC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4F93475D-653E-EE92-AFDB-CF1B8ECB9BFC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4F93475D-653E-EE92-AFDB-CF1B8ECB9BFC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4F93475D-653E-EE92-AFDB-CF1B8ECB9BFC}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {370F2F35-7CBA-4D20-AE41-9C1755006689}
+	EndGlobalSection
+EndGlobal

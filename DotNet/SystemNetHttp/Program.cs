@@ -161,6 +161,29 @@ namespace SystemNetHttpExamples
             }
         }
 
+        private static async Task<string> BasicXUnitTestExample()
+        {
+            Console.WriteLine("1. Basic XUnit Test Example");
+            Console.WriteLine("================================");
+            string responseContent = string.Empty;
+            try
+            {
+                string url = "https://jsonplaceholder.typicode.com/posts/1";
+
+                responseContent = await httpClient.GetStringAsync(url);
+            }
+            catch (HttpRequestException ex)
+            {
+                Console.WriteLine($"HTTP Request failed: {ex.Message}");
+            }
+            catch (TaskCanceledException ex)
+            {
+                Console.WriteLine($"Request timeout: {ex.Message}");
+            }
+            
+            return responseContent;
+        }
+
         /*
          * EXAMPLE 2: HTTP POST with JSON Content
          * 

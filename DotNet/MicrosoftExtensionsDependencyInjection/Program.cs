@@ -1022,6 +1022,8 @@ namespace MicrosoftExtensionsDependencyInjectionExamples
 
             // Register services that use named clients
             services.AddTransient<GitHubApiService>();
+            services.AddTransient<GitHubApiService>();
+            services.AddTransient<GitHubApiService>();
             services.AddTransient<JsonPlaceholderService>();
             services.AddTransient<HttpBinService>();
             services.AddSingleton<ILogger, ConsoleLogger>();
@@ -1243,6 +1245,18 @@ namespace MicrosoftExtensionsDependencyInjectionExamples
     }
 
     #region Service Interfaces and Implementations
+
+    // when a class is private, it can only be accessed within the containing class or struct.
+    private class TestService
+    {
+        // does this make sense? a public method inside a private class?
+        // Yes, it can make sense in certain contexts, such as when the class is used 
+        // internally within a specific scope or for demonstration purposes.
+        public void Execute()
+        {
+            Console.WriteLine("TestService executed.");
+        }
+    }
 
     // Basic services for examples
     public class Calculator
