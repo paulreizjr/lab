@@ -14,13 +14,8 @@
  * multiple CPU cores effectively while maintaining data integrity and avoiding race conditions.
  */
 
-using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace SystemThreadingExamples
 {
@@ -147,7 +142,7 @@ namespace SystemThreadingExamples
 
             // Demonstrate race condition WITHOUT synchronization
             Console.WriteLine("Attempting to demonstrate race condition (may take a few tries):");
-            
+
             for (int attempt = 1; attempt <= 3; attempt++)
             {
                 Console.WriteLine($"Attempt {attempt}:");
@@ -163,9 +158,9 @@ namespace SystemThreadingExamples
                             // RACE CONDITION: Multiple threads modifying shared variable
                             // Make the race condition more visible by reading, modifying, and writing separately
                             int temp = _sharedCounter;
-                            
+
                             // Force a context switch to make race condition more likely
-                            if (j % 100 == 0) 
+                            if (j % 100 == 0)
                             {
                                 Thread.Sleep(0); // Yield to other threads
                                 // return control to task scheduler
@@ -177,7 +172,7 @@ namespace SystemThreadingExamples
                     });
                 }
 
-                var sw = Stopwatch.StartNew();
+                var sw = Stopwatch.StartNew(); // i can edit in quick vision
                 foreach (var thread in unsafeThreads)
                     thread.Start();
                 foreach (var thread in unsafeThreads)
@@ -186,7 +181,7 @@ namespace SystemThreadingExamples
 
                 Console.WriteLine($"  Expected: {numThreads * incrementsPerThread}, Actual: {_sharedCounter}");
                 Console.WriteLine($"  Execution time: {sw.ElapsedMilliseconds}ms");
-                
+
                 if (_sharedCounter != numThreads * incrementsPerThread)
                 {
                     Console.WriteLine($"  🔴 RACE CONDITION DETECTED! Lost {numThreads * incrementsPerThread - _sharedCounter} increments!");
@@ -238,13 +233,13 @@ namespace SystemThreadingExamples
 
             Console.WriteLine($"WITH synchronization - Expected: {numThreads * incrementsPerThread}, Actual: {_sharedCounter}");
             Console.WriteLine($"Safe execution time: {stopwatch.ElapsedMilliseconds}ms");
-            
+
             if (_sharedCounter == numThreads * incrementsPerThread)
             {
                 Console.WriteLine("✅ SUCCESS! Synchronization prevented data loss - all increments counted correctly.");
                 Console.WriteLine("   The lock ensures only one thread can modify the shared variable at a time.");
             }
-            
+
             Console.WriteLine("Thread synchronization example completed.\n");
         }
 
@@ -287,15 +282,15 @@ namespace SystemThreadingExamples
                 threads[i] = new Thread(() =>
                 {
                     Console.WriteLine($"Thread {threadId} waiting for mutex...");
-                    
+
                     try
                     {
                         _mutex.WaitOne(); // Acquire mutex
                         Console.WriteLine($"Thread {threadId} acquired mutex");
-                        
+
                         // Simulate exclusive work
                         Thread.Sleep(1000);
-                        
+
                         Console.WriteLine($"Thread {threadId} releasing mutex");
                     }
                     catch (AbandonedMutexException)
@@ -357,7 +352,7 @@ namespace SystemThreadingExamples
                 threads[i] = new Thread(() =>
                 {
                     Console.WriteLine($"Thread {threadId} waiting for semaphore...");
-                    
+
                     _semaphore.WaitOne(); // Acquire semaphore slot
                     try
                     {
@@ -542,11 +537,11 @@ namespace SystemThreadingExamples
                 {
                     // Each thread has its own value
                     Console.WriteLine($"Thread {Thread.CurrentThread.ManagedThreadId}: Initial value = {threadLocalValue.Value}");
-                    
+
                     // Modify the thread-local value
                     threadLocalValue.Value += 100;
                     Console.WriteLine($"Thread {Thread.CurrentThread.ManagedThreadId}: Modified value = {threadLocalValue.Value}");
-                    
+
                     Thread.Sleep(1000);
                     Console.WriteLine($"Thread {Thread.CurrentThread.ManagedThreadId}: Final value = {threadLocalValue.Value}");
                 });
@@ -659,7 +654,7 @@ namespace SystemThreadingExamples
                     {
                         // Check for cancellation before doing work
                         token.ThrowIfCancellationRequested();
-                        
+
                         Console.WriteLine($"Worker: Processing item {i + 1}");
                         Thread.Sleep(1000);
                     }
@@ -745,7 +740,7 @@ namespace SystemThreadingExamples
                         Thread.Sleep(100); // Wait a bit before checking again
                     }
                 }
-                
+
                 // Process remaining items
                 while (queue.TryDequeue(out string item))
                 {
@@ -829,9 +824,9 @@ namespace SystemThreadingExamples
                     // Allocate some local data to show stack usage
                     byte[] localData = new byte[1024]; // 1KB local allocation
                     localData[0] = (byte)threadId; // Use the data
-                    
+
                     Console.WriteLine($"Thread {threadId}: Allocated {localData.Length} bytes locally");
-                    
+
                     barriers[threadId].SignalAndWait(); // Synchronize with main thread
                     // explain this line above better
                     // This line signals that this thread has reached the barrier and then waits for the other participant (main thread) to reach the barrier as well.
@@ -881,6 +876,7 @@ namespace SystemThreadingExamples
             Console.WriteLine("12. When to Use vs Not Use Threading:");
 
             Console.WriteLine("✅ GOOD scenarios for System.Threading:");
+            Console.WriteLine("   • CPU-bound operations that need parallelism");
             Console.WriteLine("   • CPU-intensive work that can be parallelized");
             Console.WriteLine("   • Producer-consumer patterns with different processing speeds");
             Console.WriteLine("   • Background services and long-running operations");

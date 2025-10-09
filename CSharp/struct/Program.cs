@@ -1,5 +1,4 @@
-﻿using System;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 
 // This file demonstrates practical usage of C# structs (value types) and
 // explains memory allocation implications: stack vs heap, copying, boxing,
@@ -38,6 +37,7 @@ class Program
         Console.WriteLine($"SizeOf(SmallStruct) = {Marshal.SizeOf<SmallStruct>()} bytes");
         Console.WriteLine($"SizeOf(LargeStruct) = {Marshal.SizeOf<LargeStruct>()} bytes");
         Console.WriteLine("Large structs should generally be avoided as method parameters/returns because each copy is more expensive.\n");
+        SmallStruct teste = new SmallStruct(1, 2);
 
         // 5) Boxing: when a value type is converted to object or an interface, it gets allocated on the heap
         Console.WriteLine("5) Boxing / Unboxing:");
@@ -109,10 +109,29 @@ class Program
 
     // SmallStruct and LargeStruct for size demonstration
     [StructLayout(LayoutKind.Sequential)]
-    struct SmallStruct
+    public struct SmallStruct
     {
         public int A;   // 4 bytes
         public int B;   // 4 bytes -> typical size 8
+
+        public Test t = new();
+        // t is a reference type field within the struct
+        // t is alocated on the heap when SmallStruct is created
+
+        public SmallStruct(int a, int b)
+        {
+            A = a;
+            B = b;
+            // t is automatically initialized to default (calls default constructor)
+        }
+
+        public class Test
+        {
+            public Test()
+            {
+                Console.WriteLine("class constructor within struct");
+            }
+        }
     }
 
     [StructLayout(LayoutKind.Sequential)] // ensure predictable layout. this attributes is optional and means the same as default for structs but is added here for clarity

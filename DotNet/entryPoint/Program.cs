@@ -8,6 +8,10 @@
  * Date: September 23, 2025
  */
 
+// OBS.: a project can have only one top level file with top-level statements
+// OBS2.: a project can have only one Main method (unless you specify the startup object in the project file or via compiler options)
+
+
 using System;
 using System.Threading.Tasks;
 
@@ -315,7 +319,7 @@ namespace EntryPointExamples
 // public class MathUtilities
 // {
 //     /// <summary>
-//     /// Library classes don't need entry points - they're consumed by other applications
+//     /// Library classes don't need entry points - they're consumed by other applications through references to public members.
 //     /// </summary>
 //     public static int Add(int a, int b) => a + b;
 // }
