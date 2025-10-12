@@ -4,6 +4,7 @@ write fully commented examples of how to use record in c#. comment about:
  - scenarios to use
  - scenarios not to use
  - memory allocation
+ - multithread aspects
 
 
 Target			Version		C# language version default
