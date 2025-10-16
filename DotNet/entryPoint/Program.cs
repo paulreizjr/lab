@@ -10,7 +10,7 @@
 
 // OBS.: a project can have only one top level file with top-level statements
 // OBS2.: a project can have only one Main method (unless you specify the startup object in the project file or via compiler options)
-
+// obs3.: The application entry point must be a global or static method that has either no parameters or a string array as its only parameter. The entry point can return void, or it can return an Int32 or UInt32 exit code. An application assembly cannot define more than one entry point.
 
 using System;
 using System.Threading.Tasks;
