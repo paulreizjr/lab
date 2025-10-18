@@ -1,4 +1,4 @@
-promp
+promp 1
 write fully commented examples of how to use record in c#. comment about: 
  - the purpose 
  - scenarios to use
@@ -6,6 +6,9 @@ write fully commented examples of how to use record in c#. comment about:
  - memory allocation
  - multithread aspects
 
+prompt 2 (for see solution of problems)
+two conceptual problems sample solved
+write two fully commented conceptual problems with commented solutions using iterator in c#.
 
 Target			Version		C# language version default
 .NET			10.x		C# 14

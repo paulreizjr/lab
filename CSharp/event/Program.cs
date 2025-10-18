@@ -556,7 +556,7 @@ namespace EventExamples
             Console.WriteLine();
         }
 
-        class MessageEventArgs : EventArgs
+        class MessageEventArgs : EventArgs // this heritance is optional but helpful for consistency
         {
             public string Message { get; }
             public DateTime Timestamp { get; }
