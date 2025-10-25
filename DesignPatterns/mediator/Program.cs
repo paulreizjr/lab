@@ -6,6 +6,39 @@ using System.Threading.Tasks;
 using System.Linq;
 
 /*
+WorkflowStep
+	-_stepName
+	-_mediator
+	+Process(orderId)
+
+WorkflowState
+	+orderId
+	-_completedSteps
+	+CompleteStep(stepName)
+	+IsStepCompleted(stepName)
+
+WorkFlowMediator
+	-_activeWorkFlows
+	+NotifyStepComplete(stepName, orderId)
+	+NotifyStepFailed(stepName, orderId, error)
+	-DetermineNextStep(orderId,  workflow)
+
+WorkflowStep-NotifyStepComplete()->WorkFlowMediator
+WorkFlowMediator-CompleteStep(), IsStepCompleted()->WorkflowState
+WorkFlowMediator-Process()->WorkflowStep
+*/
+
+/*
+In the mediator pattern you are abstracting the steps to get something done.
+Instead of each step being written together in a single method, you write
+the mediator that knows the workflow, and write each step as a separate class 
+that implements a common interface. The steps knows the mediator that it belongs to,
+and notifies the mediator when it completes. The mediator then decides what step to execute next.
+The mediator knows the overall workflow and each step only knows how to do its own work.
+*/
+
+
+/*
  * MEDIATOR DESIGN PATTERN IN C#
  * 
  * PURPOSE:
@@ -108,7 +141,7 @@ namespace MediatorPattern
             flight1.RequestLanding();
             flight2.RequestTakeoff();
             flight3.RequestLanding();
-            
+
             flight1.CompleteLanding();
             flight2.CompleteTakeoff();
 
@@ -195,7 +228,7 @@ namespace MediatorPattern
             };
 
             await Task.WhenAll(tasks);
-            
+
             // Small delay to see all events processed
             await Task.Delay(100);
 
@@ -242,7 +275,7 @@ namespace MediatorPattern
         public void SendMessage(string message, User sender)
         {
             Console.WriteLine($"  [{sender.Name}] {message}");
-            
+
             // Deliver to all users except sender
             foreach (var user in _users.Where(u => u != sender))
             {
@@ -317,7 +350,7 @@ namespace MediatorPattern
         public void RequestLanding(Aircraft aircraft)
         {
             Console.WriteLine($"  [TOWER] {aircraft.CallSign} requesting landing permission");
-            
+
             if (!_runwayBusy && _landingQueue.Count == 0)
             {
                 _runwayBusy = true;
@@ -334,7 +367,7 @@ namespace MediatorPattern
         public void RequestTakeoff(Aircraft aircraft)
         {
             Console.WriteLine($"  [TOWER] {aircraft.CallSign} requesting takeoff permission");
-            
+
             if (!_runwayBusy && _landingQueue.Count == 0 && _takeoffQueue.Count == 0)
             {
                 _runwayBusy = true;
@@ -462,11 +495,11 @@ namespace MediatorPattern
                 case "TextChanged":
                     ValidateForm();
                     break;
-                    
+
                 case "Click" when sender == _loginButton:
                     HandleLogin();
                     break;
-                    
+
                 case "CheckedChanged":
                     Console.WriteLine($"    Remember me option: {(_rememberCheckbox?.IsChecked == true ? "Enabled" : "Disabled")}");
                     break;
@@ -475,9 +508,9 @@ namespace MediatorPattern
 
         private void ValidateForm()
         {
-            var isValid = !string.IsNullOrEmpty(_usernameField?.Text) && 
+            var isValid = !string.IsNullOrEmpty(_usernameField?.Text) &&
                          !string.IsNullOrEmpty(_passwordField?.Text);
-            
+
             if (_loginButton != null)
             {
                 _loginButton.IsEnabled = isValid;
@@ -705,10 +738,10 @@ namespace MediatorPattern
             if (_subscribers.TryGetValue(eventType, out var handlers))
             {
                 Console.WriteLine($"    Publishing event '{eventType}' with data: {data}");
-                
+
                 // Create a snapshot to avoid concurrent modification issues
                 var handlerList = handlers.ToArray();
-                
+
                 // Execute handlers in parallel for better performance
                 Parallel.ForEach(handlerList, handler =>
                 {
