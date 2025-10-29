@@ -1,0 +1,77 @@
+@startuml MediatorSequenceDiagram
+!theme plain
+skinparam sequenceMessageAlign center
+
+title Mediator Pattern - Sequence Diagrams
+subtitle Key Interaction Patterns
+
+== Chat Room Example ==
+participant Alice as "Alice:User"
+participant ChatRoom as "ChatRoom:ChatRoomMediator"
+participant Bob as "Bob:User"
+participant Charlie as "Charlie:User"
+
+Alice -> ChatRoom : SendMessage("Hello everyone!")
+ChatRoom -> Bob : ReceiveMessage("Hello everyone!", "Alice")
+ChatRoom -> Charlie : ReceiveMessage("Hello everyone!", "Alice")
+
+Alice -> ChatRoom : SendPrivateMessage("Bob", "How are you?")
+ChatRoom -> Bob : ReceiveMessage("How are you?", "Alice")
+
+== Air Traffic Control Example ==
+participant Flight1 as "Flight1:Aircraft"
+participant Tower as "Tower:AirTrafficControlTower"
+participant Flight2 as "Flight2:Aircraft"
+
+Flight1 -> Tower : RequestLanding()
+Tower -> Tower : Check runway status
+Tower -> Flight1 : Land() [cleared]
+
+Flight2 -> Tower : RequestTakeoff()
+Tower -> Tower : Add to takeoff queue
+
+Flight1 -> Tower : NotifyLandingComplete()
+Tower -> Tower : ProcessNextOperation()
+Tower -> Flight2 : Takeoff() [cleared]
+
+== GUI Form Example ==
+participant Username as "Username:TextBox"
+participant Mediator as "Mediator:DialogMediator"
+participant LoginBtn as "LoginBtn:Button"
+participant Password as "Password:TextBox"
+
+Username -> Mediator : Notify("TextChanged", "john.doe")
+Mediator -> Mediator : ValidateForm()
+Mediator -> LoginBtn : IsEnabled = false
+
+Password -> Mediator : Notify("TextChanged", "password123")
+Mediator -> Mediator : ValidateForm()
+Mediator -> LoginBtn : IsEnabled = true
+
+LoginBtn -> Mediator : Notify("Click")
+Mediator -> Mediator : HandleLogin()
+
+== Workflow Example ==
+participant OrderStep as "OrderStep:OrderProcessingStep"
+participant Workflow as "Workflow:WorkflowMediator"
+participant PaymentStep as "PaymentStep:PaymentProcessingStep"
+
+OrderStep -> Workflow : NotifyStepComplete("OrderProcessing", "12345")
+Workflow -> Workflow : DetermineNextStep()
+note right : Triggers payment processing
+Workflow -> PaymentStep : Process payment for order 12345
+
+== Event Mediator Example ==
+participant Publisher as "Publisher:EventPublisher"
+participant EventBus as "EventBus:ThreadSafeEventMediator"
+participant Sub1 as "Sub1:EventSubscriber"
+participant Sub2 as "Sub2:EventSubscriber"
+
+Sub1 -> EventBus : Subscribe("OrderCreated", handler)
+Sub2 -> EventBus : Subscribe("OrderCreated", handler)
+
+Publisher -> EventBus : PublishEvent("OrderCreated", "Order #1001")
+EventBus -> Sub1 : HandleEvent("Order #1001") [parallel]
+EventBus -> Sub2 : HandleEvent("Order #1001") [parallel]
+
+@enduml

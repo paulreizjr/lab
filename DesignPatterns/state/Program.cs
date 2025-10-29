@@ -5,6 +5,194 @@ using System.Threading;
 using System.Threading.Tasks;
 
 /*
+IMediaPlayerContext:interface
+	+SetState(state: IMediaPlayerState): void
+	+NotifyStateChanged(stateName: string): void
+	+HasMedia: bool get
+	+CurrentTrack: string get set
+	+Volume: int get set
+	+Position: TimeSpan get set
+	+Duration: TimeSpan get
+
+IMediaPlayerState:interface
+	+StateName: string get
+	+Play(context: IMediaPlayerContext): void
+	+Pause(context: IMediaPlayerContext): void
+	+Stop(context: IMediaPlayerContext): void
+	+LoadMedia(context: IMediaPlayerContext, trackName: string): void
+	+SetVolume(context: IMediaPlayerContext, volume: int): void
+	+OnEnter(context: IMediaPlayerContext): void
+	+OnExit(context: IMediaPlayerContext): void
+
+MediaPlayerStateBase:abstract
+	+abstract StateName: string get
+	+virtual Play(context: IMediaPlayerContext): void
+	+virtual Pause(context: IMediaPlayerContext): void
+	+virtual Stop(context: IMediaPlayerContext): void
+	+virtual LoadMedia(context: IMediaPlayerContext, trackName: string): void
+	+virtual SetVolume(context: IMediaPlayerContext, volume: int): void
+	+virtual OnEnter(context: IMediaPlayerContext): void
+	+virtual OnExit(context: IMediaPlayerContext): void
+
+MediaPlayer 
+	-_currentState: IMediaPlayerState
+	-_stateLock: object
+	+CurrentTrack: string get set
+	+Volume: int get set
+	+Position: TimeSpan get set
+	+Duration: TimeSpan get
+	+HasMedia: bool get
+	+StateChanged: Action<string, string>
+	+MediaPlayer()
+	+SetState(newState: IMediaPlayerState): void
+	+NotifyStateChanged(stateName: string): void
+	+Play(): void
+	+Pause(): void
+	+Stop(): void
+	+LoadMedia(trackName: string): void
+	+SetVolume(volume: int): void
+	+GetCurrentState(): string
+	+DisplayStatus(): void
+
+NoMediaState 
+	-static _instance: Lazy<NoMediaState>
+	+static Instance: NoMediaState get
+	-NoMediaState()
+	+StateName: string get
+	+Play(context: IMediaPlayerContext): void
+	+Pause(context: IMediaPlayerContext): void
+	+Stop(context: IMediaPlayerContext): void
+	+LoadMedia(context: IMediaPlayerContext, trackName: string): void
+
+StoppedState 
+	-static _instance: Lazy<StoppedState>
+	+static Instance: StoppedState get
+	-StoppedState()
+	+StateName: string get
+	+Play(context: IMediaPlayerContext): void
+	+Stop(context: IMediaPlayerContext): void
+	+OnEnter(context: IMediaPlayerContext): void
+
+PlayingState 
+	-static _instance: Lazy<PlayingState>
+	+static Instance: PlayingState get
+	-PlayingState()
+	+StateName: string get
+	+Play(context: IMediaPlayerContext): void
+	+Pause(context: IMediaPlayerContext): void
+	+Stop(context: IMediaPlayerContext): void
+	+OnEnter(context: IMediaPlayerContext): void
+
+PausedState 
+	-static _instance: Lazy<PausedState>
+	+static Instance: PausedState get
+	-PausedState()
+	+StateName: string get
+	+Play(context: IMediaPlayerContext): void
+	+Pause(context: IMediaPlayerContext): void
+	+Stop(context: IMediaPlayerContext): void
+	+OnEnter(context: IMediaPlayerContext): void
+
+MediaPlayerStateBase-.-*>IMediaPlayerState
+NoMediaState--*>MediaPlayerStateBase
+StoppedState--*>MediaPlayerStateBase
+PlayingState--*>MediaPlayerStateBase
+PausedState--*>MediaPlayerStateBase
+MediaPlayer-.-*>IMediaPlayerContext
+MediaPlayer-.->IMediaPlayerState
+*/
+
+/*
+IDocumentWorkflowContext:interface
+	+SetState(state: IDocumentState): void
+	+Author: string get
+	+CurrentUser: string get set
+	+Reviewers: List<string> get
+	+LastModified: DateTime get set
+	+Content: string get set
+
+IDocumentState:interface
+	+StateName: string get
+	+Edit(context: IDocumentWorkflowContext, newContent: string): void
+	+Submit(context: IDocumentWorkflowContext): void
+	+Approve(context: IDocumentWorkflowContext): void
+	+Reject(context: IDocumentWorkflowContext, reason: string): void
+	+Publish(context: IDocumentWorkflowContext): void
+	+CanTransitionTo(targetState: string, user: string): bool
+
+DocumentWorkflow 
+	-_currentState: IDocumentState
+	-_stateLock: object
+	+Author: string get
+	+CurrentUser: string get set
+	+Reviewers: List<string> get
+	+LastModified: DateTime get set
+	+Content: string get set
+	+DocumentWorkflow(author: string, reviewers: List<string>)
+	+SetState(newState: IDocumentState): void
+	+Edit(newContent: string): void
+	+Submit(): void
+	+Approve(): void
+	+Reject(reason: string): void
+	+Publish(): void
+	+GetCurrentState(): string
+	+DisplayStatus(): void
+
+DraftState 
+	+StateName: string get
+	+Edit(context: IDocumentWorkflowContext, newContent: string): void
+	+Submit(context: IDocumentWorkflowContext): void
+	+Approve(context: IDocumentWorkflowContext): void
+	+Reject(context: IDocumentWorkflowContext, reason: string): void
+	+Publish(context: IDocumentWorkflowContext): void
+	+CanTransitionTo(targetState: string, user: string): bool
+
+ReviewState 
+	+StateName: string get
+	+Edit(context: IDocumentWorkflowContext, newContent: string): void
+	+Submit(context: IDocumentWorkflowContext): void
+	+Approve(context: IDocumentWorkflowContext): void
+	+Reject(context: IDocumentWorkflowContext, reason: string): void
+	+Publish(context: IDocumentWorkflowContext): void
+	+CanTransitionTo(targetState: string, user: string): bool
+
+ApprovedState 
+	+StateName: string get
+	+Edit(context: IDocumentWorkflowContext, newContent: string): void
+	+Submit(context: IDocumentWorkflowContext): void
+	+Approve(context: IDocumentWorkflowContext): void
+	+Reject(context: IDocumentWorkflowContext, reason: string): void
+	+Publish(context: IDocumentWorkflowContext): void
+	+CanTransitionTo(targetState: string, user: string): bool
+
+RejectedState 
+	+StateName: string get
+	+Edit(context: IDocumentWorkflowContext, newContent: string): void
+	+Submit(context: IDocumentWorkflowContext): void
+	+Approve(context: IDocumentWorkflowContext): void
+	+Reject(context: IDocumentWorkflowContext, reason: string): void
+	+Publish(context: IDocumentWorkflowContext): void
+	+CanTransitionTo(targetState: string, user: string): bool
+
+PublishedState 
+	+StateName: string get
+	+Edit(context: IDocumentWorkflowContext, newContent: string): void
+	+Submit(context: IDocumentWorkflowContext): void
+	+Approve(context: IDocumentWorkflowContext): void
+	+Reject(context: IDocumentWorkflowContext, reason: string): void
+	+Publish(context: IDocumentWorkflowContext): void
+	+CanTransitionTo(targetState: string, user: string): bool
+	
+DocumentWorkflow-.-*>IDocumentWorkflowContext
+DocumentWorkflow-->IDocumentState
+DraftState-.-*>IDocumentState
+ReviewState-.-*>IDocumentState
+ApprovedState-.-*>IDocumentState
+RejectedState-.-*>IDocumentState
+PublishedState-.-*>IDocumentState
+*/
+
+/*
  * STATE DESIGN PATTERN EXAMPLE
  * 
  * PURPOSE:
@@ -66,10 +254,10 @@ namespace StatePattern
         void Stop(IMediaPlayerContext context);
         void LoadMedia(IMediaPlayerContext context, string trackName);
         void SetVolume(IMediaPlayerContext context, int volume);
-        
+
         // State identification
         string StateName { get; }
-        
+
         // Optional: State entry/exit methods for cleanup or initialization
         void OnEnter(IMediaPlayerContext context);
         void OnExit(IMediaPlayerContext context);
@@ -102,7 +290,7 @@ namespace StatePattern
             Console.WriteLine($"[{StateName}] Loading media: {trackName}");
             context.CurrentTrack = trackName;
             context.Position = TimeSpan.Zero;
-            
+
             // Transition to Stopped state after loading
             context.SetState(StoppedState.Instance);
         }
@@ -114,7 +302,7 @@ namespace StatePattern
                 Console.WriteLine($"[{StateName}] Invalid volume: {volume}. Must be between 0-100");
                 return;
             }
-            
+
             context.Volume = volume;
             Console.WriteLine($"[{StateName}] Volume set to: {volume}%");
         }
@@ -137,11 +325,11 @@ namespace StatePattern
     {
         // Singleton instance to reduce memory allocation
         // MEMORY OPTIMIZATION: Single instance shared across all contexts
-        private static readonly Lazy<NoMediaState> _instance = 
+        private static readonly Lazy<NoMediaState> _instance =
             new Lazy<NoMediaState>(() => new NoMediaState(), LazyThreadSafetyMode.ExecutionAndPublication);
-        
+
         public static NoMediaState Instance => _instance.Value;
-        
+
         private NoMediaState() { } // Private constructor for singleton
 
         public override string StateName => "NoMedia";
@@ -171,9 +359,9 @@ namespace StatePattern
     // Concrete State: Media Stopped
     public sealed class StoppedState : MediaPlayerStateBase
     {
-        private static readonly Lazy<StoppedState> _instance = 
+        private static readonly Lazy<StoppedState> _instance =
             new Lazy<StoppedState>(() => new StoppedState(), LazyThreadSafetyMode.ExecutionAndPublication);
-        
+
         public static StoppedState Instance => _instance.Value;
         private StoppedState() { }
 
@@ -207,9 +395,9 @@ namespace StatePattern
     // Concrete State: Media Playing
     public sealed class PlayingState : MediaPlayerStateBase
     {
-        private static readonly Lazy<PlayingState> _instance = 
+        private static readonly Lazy<PlayingState> _instance =
             new Lazy<PlayingState>(() => new PlayingState(), LazyThreadSafetyMode.ExecutionAndPublication);
-        
+
         public static PlayingState Instance => _instance.Value;
         private PlayingState() { }
 
@@ -242,9 +430,9 @@ namespace StatePattern
     // Concrete State: Media Paused
     public sealed class PausedState : MediaPlayerStateBase
     {
-        private static readonly Lazy<PausedState> _instance = 
+        private static readonly Lazy<PausedState> _instance =
             new Lazy<PausedState>(() => new PausedState(), LazyThreadSafetyMode.ExecutionAndPublication);
-        
+
         public static PausedState Instance => _instance.Value;
         private PausedState() { }
 
@@ -280,13 +468,13 @@ namespace StatePattern
     {
         private IMediaPlayerState _currentState;
         private readonly object _stateLock = new object(); // For thread-safe state transitions
-        
+
         // Context data
         public string CurrentTrack { get; set; } = string.Empty;
         public int Volume { get; set; } = 50;
         public TimeSpan Position { get; set; } = TimeSpan.Zero;
         public TimeSpan Duration { get; private set; } = TimeSpan.FromMinutes(3); // Mock duration
-        
+
         public bool HasMedia => !string.IsNullOrEmpty(CurrentTrack);
 
         // Event for state change notifications
@@ -314,16 +502,16 @@ namespace StatePattern
                 }
 
                 var oldStateName = _currentState.StateName;
-                
+
                 // Call exit method on current state
                 _currentState.OnExit(this);
-                
+
                 // Change state
                 _currentState = newState;
-                
+
                 // Call enter method on new state
                 _currentState.OnEnter(this);
-                
+
                 // Notify observers
                 NotifyStateChanged(newState.StateName);
                 StateChanged?.Invoke(oldStateName, newState.StateName);
@@ -433,7 +621,7 @@ namespace StatePattern
                 Console.WriteLine("[Draft] Only author can edit draft");
                 return;
             }
-            
+
             context.Content = newContent;
             context.LastModified = DateTime.Now;
             Console.WriteLine("[Draft] Document edited");
@@ -446,21 +634,21 @@ namespace StatePattern
                 Console.WriteLine("[Draft] Only author can submit draft");
                 return;
             }
-            
+
             Console.WriteLine("[Draft] Submitting for review");
             context.SetState(new ReviewState());
         }
 
-        public void Approve(IDocumentWorkflowContext context) 
+        public void Approve(IDocumentWorkflowContext context)
             => Console.WriteLine("[Draft] Cannot approve draft directly");
 
-        public void Reject(IDocumentWorkflowContext context, string reason) 
+        public void Reject(IDocumentWorkflowContext context, string reason)
             => Console.WriteLine("[Draft] Cannot reject draft");
 
-        public void Publish(IDocumentWorkflowContext context) 
+        public void Publish(IDocumentWorkflowContext context)
             => Console.WriteLine("[Draft] Cannot publish draft directly");
 
-        public bool CanTransitionTo(string targetState, string user) 
+        public bool CanTransitionTo(string targetState, string user)
             => targetState == "Review";
     }
 
@@ -481,7 +669,7 @@ namespace StatePattern
                 Console.WriteLine("[Review] Only reviewers can approve");
                 return;
             }
-            
+
             Console.WriteLine("[Review] Document approved");
             context.SetState(new ApprovedState());
         }
@@ -493,7 +681,7 @@ namespace StatePattern
                 Console.WriteLine("[Review] Only reviewers can reject");
                 return;
             }
-            
+
             Console.WriteLine($"[Review] Document rejected: {reason}");
             context.SetState(new RejectedState());
         }
@@ -547,7 +735,7 @@ namespace StatePattern
                 Console.WriteLine("[Rejected] Only author can edit rejected document");
                 return;
             }
-            
+
             context.Content = newContent;
             context.LastModified = DateTime.Now;
             Console.WriteLine("[Rejected] Document edited, returning to draft");
@@ -615,7 +803,7 @@ namespace StatePattern
             Reviewers = reviewers ?? new List<string>();
             _currentState = new DraftState();
             LastModified = DateTime.Now;
-            
+
             Console.WriteLine($"[DocumentWorkflow] Created by {author} with reviewers: {string.Join(", ", Reviewers)}");
         }
 
@@ -698,10 +886,10 @@ namespace StatePattern
         public static async Task RunConcurrentMediaPlayerTest()
         {
             Console.WriteLine("\n[MULTITHREAD TEST] Testing concurrent media player operations...");
-            
+
             var player = new MediaPlayer();
             player.LoadMedia("Concurrent Test Track");
-            
+
             // Create tasks that perform different operations concurrently
             var tasks = new Task[]
             {
@@ -714,7 +902,7 @@ namespace StatePattern
                         Thread.Sleep(100);
                     }
                 }),
-                
+
                 Task.Run(() => {
                     for (int i = 0; i < 10; i++)
                     {
@@ -722,7 +910,7 @@ namespace StatePattern
                         Thread.Sleep(50);
                     }
                 }),
-                
+
                 Task.Run(() => {
                     Thread.Sleep(250);
                     player.Stop();
@@ -730,9 +918,9 @@ namespace StatePattern
                     player.Play();
                 })
             };
-            
+
             await Task.WhenAll(tasks);
-            
+
             player.DisplayStatus();
             Console.WriteLine("[MULTITHREAD TEST] Concurrent operations completed successfully");
         }
@@ -740,32 +928,32 @@ namespace StatePattern
         public static async Task RunConcurrentDocumentWorkflowTest()
         {
             Console.WriteLine("\n[MULTITHREAD TEST] Testing concurrent document workflow...");
-            
+
             var document = new DocumentWorkflow("Alice", new List<string> { "Bob", "Charlie" });
             document.Edit("Initial content");
-            
+
             var tasks = new Task[]
             {
                 Task.Run(() => {
                     document.CurrentUser = "Alice";
                     document.Submit();
                 }),
-                
+
                 Task.Run(() => {
                     Thread.Sleep(100);
                     document.CurrentUser = "Bob";
                     document.Approve();
                 }),
-                
+
                 Task.Run(() => {
                     Thread.Sleep(200);
                     document.CurrentUser = "Alice";
                     document.Publish();
                 })
             };
-            
+
             await Task.WhenAll(tasks);
-            
+
             document.DisplayStatus();
             Console.WriteLine("[MULTITHREAD TEST] Concurrent workflow operations completed");
         }
@@ -780,28 +968,28 @@ namespace StatePattern
             // Example 1: Basic Media Player State Machine
             Console.WriteLine("1. BASIC MEDIA PLAYER STATE MACHINE:");
             Console.WriteLine(new string('-', 60));
-            
+
             var player = new MediaPlayer();
-            
+
             // Subscribe to state change events
-            player.StateChanged += (oldState, newState) => 
+            player.StateChanged += (oldState, newState) =>
                 Console.WriteLine($"[EVENT] State transition: {oldState} -> {newState}");
-            
+
             Console.WriteLine("\nTrying to play without media:");
             player.Play();
             player.DisplayStatus();
-            
+
             Console.WriteLine("\nLoading media and testing state transitions:");
             player.LoadMedia("Song.mp3");
             player.DisplayStatus();
-            
+
             Console.WriteLine("\nPlay -> Pause -> Play -> Stop sequence:");
             player.Play();
             player.Pause();
             player.Play();
             player.Stop();
             player.DisplayStatus();
-            
+
             Console.WriteLine("\nTesting volume control in different states:");
             player.SetVolume(75);
             player.Play();
@@ -814,27 +1002,27 @@ namespace StatePattern
             // Example 2: Document Workflow State Machine
             Console.WriteLine("\n\n2. DOCUMENT WORKFLOW STATE MACHINE:");
             Console.WriteLine(new string('-', 60));
-            
+
             var document = new DocumentWorkflow("Alice", new List<string> { "Bob", "Charlie" });
-            
+
             Console.WriteLine("\nAuthor creates and edits document:");
             document.Edit("This is the initial draft content.");
             document.DisplayStatus();
-            
+
             Console.WriteLine("\nAuthor submits for review:");
             document.Submit();
             document.DisplayStatus();
-            
+
             Console.WriteLine("\nReviewer approves document:");
             document.CurrentUser = "Bob";
             document.Approve();
             document.DisplayStatus();
-            
+
             Console.WriteLine("\nDocument gets published:");
             document.CurrentUser = "Alice";
             document.Publish();
             document.DisplayStatus();
-            
+
             Console.WriteLine("\nTrying invalid operations:");
             document.Edit("Cannot edit published document");
             document.Reject("Cannot reject published document");
@@ -845,16 +1033,16 @@ namespace StatePattern
             // Example 3: Rejected Document Flow
             Console.WriteLine("\n\n3. REJECTED DOCUMENT WORKFLOW:");
             Console.WriteLine(new string('-', 60));
-            
+
             var rejectedDoc = new DocumentWorkflow("Dave", new List<string> { "Eve" });
             rejectedDoc.Edit("Initial content");
             rejectedDoc.Submit();
-            
+
             Console.WriteLine("\nReviewer rejects document:");
             rejectedDoc.CurrentUser = "Eve";
             rejectedDoc.Reject("Content needs improvement");
             rejectedDoc.DisplayStatus();
-            
+
             Console.WriteLine("\nAuthor edits and resubmits:");
             rejectedDoc.CurrentUser = "Dave";
             rejectedDoc.Edit("Improved content after feedback");
@@ -867,7 +1055,7 @@ namespace StatePattern
             // Example 4: Multithreading demonstrations
             Console.WriteLine("\n\n4. MULTITHREADING DEMONSTRATIONS:");
             Console.WriteLine(new string('-', 60));
-            
+
             await MultithreadingDemo.RunConcurrentMediaPlayerTest();
             await MultithreadingDemo.RunConcurrentDocumentWorkflowTest();
 
@@ -884,7 +1072,7 @@ namespace StatePattern
             Console.WriteLine("- State transitions require synchronization in multithreaded scenarios");
             Console.WriteLine("- Eliminates complex conditional logic improving maintainability");
             Console.WriteLine("- Method delegation adds minimal overhead compared to switch statements");
-            
+
             Console.WriteLine("\nBENEFITS DEMONSTRATED:");
             Console.WriteLine("- Clean separation of state-specific behavior");
             Console.WriteLine("- Easy to add new states without modifying existing code");

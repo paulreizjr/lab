@@ -6,6 +6,51 @@ using System.Threading.Tasks;
 using System.Linq;
 
 /*
+IDialogMediator:interface
+	+Notify(sender: Component, eventType: string, data: object?): void
+
+
+DialogMediator 
+	-_loginButton: Button?
+	-_usernameField: TextBox?
+	-_passwordField: TextBox?
+	-_rememberCheckbox: CheckBox?
+	+Notify(sender: Component, eventType: string, data: object?): void
+	-ValidateForm(): void
+	-HandleLogin(): void
+
+
+Component:abstract
+	+Name: string get
+	_mediator: IDialogMediator?
+	Component(name: string, mediator: IDialogMediator?)
+
+
+Button 
+	+IsEnabled: bool get set
+	+Button(name: string, mediator: IDialogMediator)
+	+Click(): void
+
+
+TextBox 
+	+Text: string get
+	+TextBox(name: string, mediator: IDialogMediator)
+	+SetText(text: string): void
+
+
+CheckBox 
+	+IsChecked: bool get
+	+CheckBox(name: string, mediator: IDialogMediator)
+	+SetChecked(isChecked: bool): void
+
+DialogMediator-.-*>IDialogMediator
+Component-->IDialogMediator
+Button--*>Component
+TextBox--*>Component
+CheckBox--*>Component
+*/
+
+/*
 WorkflowStep
 	-_stepName
 	-_mediator

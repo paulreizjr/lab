@@ -1,0 +1,274 @@
+@startuml StatePatternClassDiagram
+!theme plain
+skinparam classAttributeIconSize 0
+skinparam classFontStyle bold
+skinparam packageStyle rectangle
+
+title State Pattern - Class Diagram
+subtitle Media Player and Document Workflow State Machines
+
+package "State Pattern Core" {
+    interface IMediaPlayerContext {
+        +SetState(state: IMediaPlayerState): void
+        +NotifyStateChanged(stateName: string): void
+        +HasMedia: bool {get}
+        +CurrentTrack: string {get; set}
+        +Volume: int {get; set}
+        +Position: TimeSpan {get; set}
+        +Duration: TimeSpan {get}
+    }
+
+    interface IMediaPlayerState {
+        +StateName: string {get}
+        +Play(context: IMediaPlayerContext): void
+        +Pause(context: IMediaPlayerContext): void
+        +Stop(context: IMediaPlayerContext): void
+        +LoadMedia(context: IMediaPlayerContext, trackName: string): void
+        +SetVolume(context: IMediaPlayerContext, volume: int): void
+        +OnEnter(context: IMediaPlayerContext): void
+        +OnExit(context: IMediaPlayerContext): void
+    }
+
+    abstract class MediaPlayerStateBase {
+        +{abstract} StateName: string {get}
+        +{virtual} Play(context: IMediaPlayerContext): void
+        +{virtual} Pause(context: IMediaPlayerContext): void
+        +{virtual} Stop(context: IMediaPlayerContext): void
+        +{virtual} LoadMedia(context: IMediaPlayerContext, trackName: string): void
+        +{virtual} SetVolume(context: IMediaPlayerContext, volume: int): void
+        +{virtual} OnEnter(context: IMediaPlayerContext): void
+        +{virtual} OnExit(context: IMediaPlayerContext): void
+    }
+
+    class MediaPlayer {
+        -_currentState: IMediaPlayerState
+        -_stateLock: object
+        +CurrentTrack: string {get; set}
+        +Volume: int {get; set}
+        +Position: TimeSpan {get; set}
+        +Duration: TimeSpan {get}
+        +HasMedia: bool {get}
+        +StateChanged: Action<string, string>
+        
+        +MediaPlayer()
+        +SetState(newState: IMediaPlayerState): void
+        +NotifyStateChanged(stateName: string): void
+        +Play(): void
+        +Pause(): void
+        +Stop(): void
+        +LoadMedia(trackName: string): void
+        +SetVolume(volume: int): void
+        +GetCurrentState(): string
+        +DisplayStatus(): void
+    }
+}
+
+package "Concrete Media Player States" {
+    class NoMediaState {
+        -{static} _instance: Lazy<NoMediaState>
+        +{static} Instance: NoMediaState {get}
+        -NoMediaState()
+        +StateName: string {get}
+        +Play(context: IMediaPlayerContext): void
+        +Pause(context: IMediaPlayerContext): void
+        +Stop(context: IMediaPlayerContext): void
+        +LoadMedia(context: IMediaPlayerContext, trackName: string): void
+    }
+
+    class StoppedState {
+        -{static} _instance: Lazy<StoppedState>
+        +{static} Instance: StoppedState {get}
+        -StoppedState()
+        +StateName: string {get}
+        +Play(context: IMediaPlayerContext): void
+        +Stop(context: IMediaPlayerContext): void
+        +OnEnter(context: IMediaPlayerContext): void
+    }
+
+    class PlayingState {
+        -{static} _instance: Lazy<PlayingState>
+        +{static} Instance: PlayingState {get}
+        -PlayingState()
+        +StateName: string {get}
+        +Play(context: IMediaPlayerContext): void
+        +Pause(context: IMediaPlayerContext): void
+        +Stop(context: IMediaPlayerContext): void
+        +OnEnter(context: IMediaPlayerContext): void
+    }
+
+    class PausedState {
+        -{static} _instance: Lazy<PausedState>
+        +{static} Instance: PausedState {get}
+        -PausedState()
+        +StateName: string {get}
+        +Play(context: IMediaPlayerContext): void
+        +Pause(context: IMediaPlayerContext): void
+        +Stop(context: IMediaPlayerContext): void
+        +OnEnter(context: IMediaPlayerContext): void
+    }
+}
+
+package "Document Workflow States" {
+    interface IDocumentWorkflowContext {
+        +SetState(state: IDocumentState): void
+        +Author: string {get}
+        +CurrentUser: string {get; set}
+        +Reviewers: List<string> {get}
+        +LastModified: DateTime {get; set}
+        +Content: string {get; set}
+    }
+
+    interface IDocumentState {
+        +StateName: string {get}
+        +Edit(context: IDocumentWorkflowContext, newContent: string): void
+        +Submit(context: IDocumentWorkflowContext): void
+        +Approve(context: IDocumentWorkflowContext): void
+        +Reject(context: IDocumentWorkflowContext, reason: string): void
+        +Publish(context: IDocumentWorkflowContext): void
+        +CanTransitionTo(targetState: string, user: string): bool
+    }
+
+    class DocumentWorkflow {
+        -_currentState: IDocumentState
+        -_stateLock: object
+        +Author: string {get}
+        +CurrentUser: string {get; set}
+        +Reviewers: List<string> {get}
+        +LastModified: DateTime {get; set}
+        +Content: string {get; set}
+        
+        +DocumentWorkflow(author: string, reviewers: List<string>)
+        +SetState(newState: IDocumentState): void
+        +Edit(newContent: string): void
+        +Submit(): void
+        +Approve(): void
+        +Reject(reason: string): void
+        +Publish(): void
+        +GetCurrentState(): string
+        +DisplayStatus(): void
+    }
+
+    class DraftState {
+        +StateName: string {get}
+        +Edit(context: IDocumentWorkflowContext, newContent: string): void
+        +Submit(context: IDocumentWorkflowContext): void
+        +Approve(context: IDocumentWorkflowContext): void
+        +Reject(context: IDocumentWorkflowContext, reason: string): void
+        +Publish(context: IDocumentWorkflowContext): void
+        +CanTransitionTo(targetState: string, user: string): bool
+    }
+
+    class ReviewState {
+        +StateName: string {get}
+        +Edit(context: IDocumentWorkflowContext, newContent: string): void
+        +Submit(context: IDocumentWorkflowContext): void
+        +Approve(context: IDocumentWorkflowContext): void
+        +Reject(context: IDocumentWorkflowContext, reason: string): void
+        +Publish(context: IDocumentWorkflowContext): void
+        +CanTransitionTo(targetState: string, user: string): bool
+    }
+
+    class ApprovedState {
+        +StateName: string {get}
+        +Edit(context: IDocumentWorkflowContext, newContent: string): void
+        +Submit(context: IDocumentWorkflowContext): void
+        +Approve(context: IDocumentWorkflowContext): void
+        +Reject(context: IDocumentWorkflowContext, reason: string): void
+        +Publish(context: IDocumentWorkflowContext): void
+        +CanTransitionTo(targetState: string, user: string): bool
+    }
+
+    class RejectedState {
+        +StateName: string {get}
+        +Edit(context: IDocumentWorkflowContext, newContent: string): void
+        +Submit(context: IDocumentWorkflowContext): void
+        +Approve(context: IDocumentWorkflowContext): void
+        +Reject(context: IDocumentWorkflowContext, reason: string): void
+        +Publish(context: IDocumentWorkflowContext): void
+        +CanTransitionTo(targetState: string, user: string): bool
+    }
+
+    class PublishedState {
+        +StateName: string {get}
+        +Edit(context: IDocumentWorkflowContext, newContent: string): void
+        +Submit(context: IDocumentWorkflowContext): void
+        +Approve(context: IDocumentWorkflowContext): void
+        +Reject(context: IDocumentWorkflowContext, reason: string): void
+        +Publish(context: IDocumentWorkflowContext): void
+        +CanTransitionTo(targetState: string, user: string): bool
+    }
+}
+
+package "Demo Classes" {
+    class MultithreadingDemo {
+        +{static} RunConcurrentMediaPlayerTest(): Task
+        +{static} RunConcurrentDocumentWorkflowTest(): Task
+    }
+
+    class Program {
+        +{static} Main(args: string[]): Task
+    }
+}
+
+' Relationships - Media Player
+IMediaPlayerState <|.. MediaPlayerStateBase : implements
+MediaPlayerStateBase <|-- NoMediaState : extends
+MediaPlayerStateBase <|-- StoppedState : extends
+MediaPlayerStateBase <|-- PlayingState : extends
+MediaPlayerStateBase <|-- PausedState : extends
+
+IMediaPlayerContext <|.. MediaPlayer : implements
+MediaPlayer --> IMediaPlayerState : delegates to
+MediaPlayer ..> NoMediaState : creates
+MediaPlayer ..> StoppedState : transitions to
+MediaPlayer ..> PlayingState : transitions to
+MediaPlayer ..> PausedState : transitions to
+
+' Relationships - Document Workflow
+IDocumentState <|.. DraftState : implements
+IDocumentState <|.. ReviewState : implements
+IDocumentState <|.. ApprovedState : implements
+IDocumentState <|.. RejectedState : implements
+IDocumentState <|.. PublishedState : implements
+
+IDocumentWorkflowContext <|.. DocumentWorkflow : implements
+DocumentWorkflow --> IDocumentState : delegates to
+DocumentWorkflow ..> DraftState : creates
+DocumentWorkflow ..> ReviewState : transitions to
+DocumentWorkflow ..> ApprovedState : transitions to
+DocumentWorkflow ..> RejectedState : transitions to
+DocumentWorkflow ..> PublishedState : transitions to
+
+' Demo relationships
+Program ..> MediaPlayer : uses
+Program ..> DocumentWorkflow : uses
+Program ..> MultithreadingDemo : uses
+MultithreadingDemo ..> MediaPlayer : tests
+MultithreadingDemo ..> DocumentWorkflow : tests
+
+' State transitions (dotted arrows for clarity)
+NoMediaState ..> StoppedState : LoadMedia
+StoppedState ..> PlayingState : Play
+StoppedState ..> NoMediaState : invalid operations
+PlayingState ..> PausedState : Pause
+PlayingState ..> StoppedState : Stop
+PausedState ..> PlayingState : Play
+PausedState ..> StoppedState : Stop
+
+DraftState ..> ReviewState : Submit
+ReviewState ..> ApprovedState : Approve
+ReviewState ..> RejectedState : Reject
+ApprovedState ..> PublishedState : Publish
+RejectedState ..> DraftState : Edit
+
+note top of MediaPlayerStateBase : "Abstract base class providing\ndefault implementations and\ncommon functionality"
+
+note top of NoMediaState : "Singleton pattern used for\nall concrete states to\noptimize memory usage"
+
+note top of MediaPlayer : "Context class that maintains\ncurrent state and delegates\nbehavior. Thread-safe with\nlocking mechanisms."
+
+note top of DocumentWorkflow : "Advanced state machine with\ncomplex business rules and\nrole-based access control"
+
+note bottom of MultithreadingDemo : "Demonstrates thread-safe\nstate transitions and\nconcurrent operations"
+
+@enduml

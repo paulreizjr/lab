@@ -1,0 +1,268 @@
+@startuml MediatorPatternClassDiagram
+!theme plain
+skinparam classAttributeIconSize 0
+skinparam classFontStyle bold
+skinparam packageStyle rectangle
+
+title Mediator Pattern - Class Diagram
+subtitle Chat Room, Air Traffic Control, GUI, Workflow, and Event Systems
+
+package "Chat Room Mediator Example" {
+    interface IChatRoomMediator {
+        +SendMessage(message: string, sender: User): void
+        +SendPrivateMessage(message: string, sender: User, recipientName: string): void
+        +AddUser(user: User): void
+        +RemoveUser(user: User): void
+    }
+
+    class ChatRoomMediator {
+        -_users: List<User>
+        +AddUser(user: User): void
+        +RemoveUser(user: User): void
+        +SendMessage(message: string, sender: User): void
+        +SendPrivateMessage(message: string, sender: User, recipientName: string): void
+    }
+
+    class User {
+        +Name: string {get}
+        -_mediator: IChatRoomMediator
+        +User(name: string, mediator: IChatRoomMediator)
+        +SendMessage(message: string): void
+        +SendPrivateMessage(recipientName: string, message: string): void
+        +ReceiveMessage(message: string, senderName: string): void
+    }
+}
+
+package "Air Traffic Control Example" {
+    interface IAirTrafficControlMediator {
+        +RequestLanding(aircraft: Aircraft): void
+        +RequestTakeoff(aircraft: Aircraft): void
+        +NotifyLandingComplete(aircraft: Aircraft): void
+        +NotifyTakeoffComplete(aircraft: Aircraft): void
+    }
+
+    class AirTrafficControlTower {
+        -_landingQueue: Queue<Aircraft>
+        -_takeoffQueue: Queue<Aircraft>
+        -_runwayBusy: bool
+        +RequestLanding(aircraft: Aircraft): void
+        +RequestTakeoff(aircraft: Aircraft): void
+        +NotifyLandingComplete(aircraft: Aircraft): void
+        +NotifyTakeoffComplete(aircraft: Aircraft): void
+        -ProcessNextOperation(): void
+    }
+
+    class Aircraft {
+        +CallSign: string {get}
+        +AircraftType: string {get}
+        -_controlTower: IAirTrafficControlMediator
+        +Aircraft(callSign: string, aircraftType: string, controlTower: IAirTrafficControlMediator)
+        +RequestLanding(): void
+        +RequestTakeoff(): void
+        +Land(): void
+        +Takeoff(): void
+        +CompleteLanding(): void
+        +CompleteTakeoff(): void
+    }
+}
+
+package "GUI Form Mediator Example" {
+    interface IDialogMediator {
+        +Notify(sender: Component, eventType: string, data: object?): void
+    }
+
+    class DialogMediator {
+        -_loginButton: Button?
+        -_usernameField: TextBox?
+        -_passwordField: TextBox?
+        -_rememberCheckbox: CheckBox?
+        +Notify(sender: Component, eventType: string, data: object?): void
+        -ValidateForm(): void
+        -HandleLogin(): void
+    }
+
+    abstract class Component {
+        +Name: string {get}
+        #_mediator: IDialogMediator?
+        #Component(name: string, mediator: IDialogMediator?)
+    }
+
+    class Button {
+        +IsEnabled: bool {get; set}
+        +Button(name: string, mediator: IDialogMediator)
+        +Click(): void
+    }
+
+    class TextBox {
+        +Text: string {get}
+        +TextBox(name: string, mediator: IDialogMediator)
+        +SetText(text: string): void
+    }
+
+    class CheckBox {
+        +IsChecked: bool {get}
+        +CheckBox(name: string, mediator: IDialogMediator)
+        +SetChecked(isChecked: bool): void
+    }
+}
+
+package "Workflow Mediator Example" {
+    interface IWorkflowMediator {
+        +NotifyStepComplete(stepName: string, orderId: string, result: object?): void
+        +NotifyStepFailed(stepName: string, orderId: string, error: string): void
+    }
+
+    class WorkflowMediator {
+        -_activeWorkflows: Dictionary<string, WorkflowState>
+        +NotifyStepComplete(stepName: string, orderId: string, result: object?): void
+        +NotifyStepFailed(stepName: string, orderId: string, error: string): void
+        -DetermineNextStep(orderId: string, workflow: WorkflowState): void
+    }
+
+    class WorkflowState {
+        +OrderId: string {get}
+        -_completedSteps: HashSet<string>
+        +WorkflowState(orderId: string)
+        +CompleteStep(stepName: string): void
+        +IsStepComplete(stepName: string): bool
+    }
+
+    abstract class WorkflowStep {
+        #_mediator: IWorkflowMediator
+        #_stepName: string
+        #WorkflowStep(stepName: string, mediator: IWorkflowMediator)
+    }
+
+    class OrderProcessingStep {
+        +OrderProcessingStep(mediator: IWorkflowMediator)
+        +ProcessOrder(orderId: string): void
+    }
+
+    class PaymentProcessingStep {
+        +PaymentProcessingStep(mediator: IWorkflowMediator)
+    }
+
+    class InventoryStep {
+        +InventoryStep(mediator: IWorkflowMediator)
+    }
+
+    class ShippingStep {
+        +ShippingStep(mediator: IWorkflowMediator)
+    }
+}
+
+package "Thread-Safe Event Mediator Example" {
+    interface IEventMediator {
+        +PublishEvent(eventType: string, data: object): void
+        +Subscribe(eventType: string, handler: Action<object>): void
+        +Unsubscribe(eventType: string, handler: Action<object>): void
+    }
+
+    class ThreadSafeEventMediator {
+        -_subscribers: ConcurrentDictionary<string, ConcurrentBag<Action<object>>>
+        +PublishEvent(eventType: string, data: object): void
+        +Subscribe(eventType: string, handler: Action<object>): void
+        +Unsubscribe(eventType: string, handler: Action<object>): void
+    }
+
+    class EventPublisher {
+        -_name: string
+        -_eventMediator: IEventMediator
+        +EventPublisher(name: string, eventMediator: IEventMediator)
+        +PublishEvent(eventType: string, data: object): void
+    }
+
+    class EventSubscriber {
+        -_name: string
+        -_eventMediator: IEventMediator
+        +EventSubscriber(name: string, eventMediator: IEventMediator)
+        +SubscribeToEvent(eventType: string): void
+        -HandleEvent(data: object): void
+    }
+}
+
+package "Main Program" {
+    class Program {
+        +{static} Main(args: string[]): Task
+        +{static} BasicChatRoomExample(): void
+        +{static} AirTrafficControlExample(): void
+        +{static} GuiMediatorExample(): void
+        +{static} WorkflowMediatorExample(): void
+        +{static} ThreadSafeEventMediatorExample(): Task
+    }
+}
+
+' Relationships - Chat Room
+IChatRoomMediator <|.. ChatRoomMediator : implements
+ChatRoomMediator o-- User : manages
+User --> IChatRoomMediator : uses
+
+' Relationships - Air Traffic Control
+IAirTrafficControlMediator <|.. AirTrafficControlTower : implements
+AirTrafficControlTower o-- Aircraft : manages
+Aircraft --> IAirTrafficControlMediator : uses
+
+' Relationships - GUI Form
+IDialogMediator <|.. DialogMediator : implements
+Component <|-- Button : extends
+Component <|-- TextBox : extends
+Component <|-- CheckBox : extends
+Component --> IDialogMediator : uses
+DialogMediator ..> Button : references
+DialogMediator ..> TextBox : references
+DialogMediator ..> CheckBox : references
+
+' Relationships - Workflow
+IWorkflowMediator <|.. WorkflowMediator : implements
+WorkflowMediator o-- WorkflowState : manages
+WorkflowStep <|-- OrderProcessingStep : extends
+WorkflowStep <|-- PaymentProcessingStep : extends
+WorkflowStep <|-- InventoryStep : extends
+WorkflowStep <|-- ShippingStep : extends
+WorkflowStep --> IWorkflowMediator : uses
+
+' Relationships - Event System
+IEventMediator <|.. ThreadSafeEventMediator : implements
+EventPublisher --> IEventMediator : uses
+EventSubscriber --> IEventMediator : uses
+
+' Program relationships
+Program ..> ChatRoomMediator : creates
+Program ..> User : creates
+Program ..> AirTrafficControlTower : creates
+Program ..> Aircraft : creates
+Program ..> DialogMediator : creates
+Program ..> Button : creates
+Program ..> TextBox : creates
+Program ..> CheckBox : creates
+Program ..> WorkflowMediator : creates
+Program ..> OrderProcessingStep : creates
+Program ..> PaymentProcessingStep : creates
+Program ..> InventoryStep : creates
+Program ..> ShippingStep : creates
+Program ..> ThreadSafeEventMediator : creates
+Program ..> EventPublisher : creates
+Program ..> EventSubscriber : creates
+
+' Communication flow annotations
+note right of ChatRoomMediator : "Manages user communication\nand message routing between\nmultiple chat participants"
+
+note right of AirTrafficControlTower : "Coordinates aircraft operations\nManages runway access and\nqueue processing for safety"
+
+note right of DialogMediator : "Coordinates form controls\nValidates input and manages\ninter-control dependencies"
+
+note right of WorkflowMediator : "Orchestrates business workflow\nTracks step completion and\ntriggers next workflow steps"
+
+note right of ThreadSafeEventMediator : "Thread-safe event distribution\nUses concurrent collections\nfor multi-threaded scenarios"
+
+note top of User : "Colleague that communicates\nthrough mediator instead\nof direct peer communication"
+
+note top of Aircraft : "Colleague that requests\noperations through control\ntower rather than directly"
+
+note top of Component : "Base class for UI controls\nthat interact through\nthe dialog mediator"
+
+note top of WorkflowStep : "Base class for workflow\nsteps that notify mediator\nof completion or failure"
+
+note bottom of Program : "Demonstrates all mediator\npattern examples with\ndifferent use cases"
+
+@enduml

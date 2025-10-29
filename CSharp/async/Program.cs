@@ -372,18 +372,42 @@ namespace AsyncExamples
              * - Useful for caching scenarios or fast-path operations
              * - Should only be used when you have performance measurements proving benefit
              */
-            
+
             // Simulate a cached result (synchronous path)
             if (DateTime.Now.Millisecond % 2 == 0)
             {
                 Console.WriteLine("ValueTask: Synchronous path (no allocation)");
                 return 42; // No Task allocation needed
             }
-            
+
             // Async path when cache miss
             Console.WriteLine("ValueTask: Asynchronous path");
             await Task.Delay(50);
             return 42;
+        }
+        
+        void myMethod1()
+        {
+            Console.WriteLine("This is my method 1");
+            myMethod2();
+        }
+
+        void myMethod2()
+        {
+            Console.WriteLine("This is my method 2");
+            myMethod3();
+        }
+
+        void myMethod3()
+        {
+            Console.WriteLine("This is my method 3");
+            myMethod4().Wait();
+        }
+
+        async Task myMethod4()
+        {
+            Console.WriteLine("This is my method 4");
+            await Task.Delay(50);
         }
 
         static void WhenNotToUseAsync()

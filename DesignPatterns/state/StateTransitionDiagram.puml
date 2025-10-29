@@ -1,0 +1,57 @@
+@startuml StateTransitionDiagram
+!theme plain
+skinparam state {
+    BackgroundColor LightBlue
+    BorderColor Blue
+    FontStyle bold
+}
+
+title State Pattern - State Transition Diagrams
+
+package "Media Player State Machine" {
+    [*] --> NoMedia : Initialize
+
+    NoMedia --> Stopped : LoadMedia(track)
+    NoMedia --> NoMedia : Play/Pause/Stop\n(invalid operations)
+
+    Stopped --> Playing : Play()
+    Stopped --> Stopped : Stop()\n(already stopped)
+    Stopped --> NoMedia : invalid operations\n(no media)
+
+    Playing --> Paused : Pause()
+    Playing --> Stopped : Stop()
+    Playing --> Playing : Play()\n(already playing)
+
+    Paused --> Playing : Play()\n(resume)
+    Paused --> Stopped : Stop()
+    Paused --> Paused : Pause()\n(already paused)
+
+    note right of NoMedia : "Initial state\nNo media loaded"
+    note right of Stopped : "Media loaded\nbut not playing"
+    note right of Playing : "Media is currently\nplaying"
+    note right of Paused : "Media paused\nretains position"
+}
+
+package "Document Workflow State Machine" {
+    [*] --> Draft : Create Document
+
+    Draft --> Review : Submit()\n[author only]
+    Draft --> Draft : Edit()\n[author only]
+
+    Review --> Approved : Approve()\n[reviewers only]
+    Review --> Rejected : Reject(reason)\n[reviewers only]
+
+    Approved --> Published : Publish()
+
+    Rejected --> Draft : Edit()\n[author only]
+
+    Published --> [*] : End
+
+    note right of Draft : "Author can edit\nand submit"
+    note right of Review : "Reviewers can\napprove or reject"
+    note right of Approved : "Ready for\npublishing"
+    note right of Rejected : "Needs author\nrevision"
+    note right of Published : "Final state\nno further changes"
+}
+
+@enduml
