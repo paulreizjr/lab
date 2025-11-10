@@ -46,6 +46,8 @@ namespace IsKeywordExamples
     {
         static async Task Main(string[] args)
         {
+            #error version
+            
             Console.WriteLine("=== C# 'is' Keyword Examples ===\n");
 
             // Example 1: Basic Type Testing

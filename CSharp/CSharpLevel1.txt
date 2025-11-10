@@ -1,0 +1,600 @@
+The history of C#
+
+c#13
+
+-------
+the params modifier isn't limited to array types
+        public static void ProcessItems(params MyCollection<int> numbers)
+        {
+            foreach (var collection in numbers)
+            {
+                foreach (var item in collection)
+                {
+                    Console.WriteLine(item);
+                }
+            }
+        }
+		
+-------
+New lock type and semantics
+According to Microsoft, the new Lock type can be more efficient than locking on arbitrary object instances, 
+potentially offering performance benefits in highly contended scenarios.
+
+	private readonly Lock _lock = new Lock(); // New Lock type
+    public void Increment()
+    {
+        lock (_lock) // Using the lock statement with the new Lock type
+        {
+            _counter++;
+            // Critical section where _counter is safely accessed
+        }
+    }
+	
+-------
+New escape sequence
+// Before C# 13
+char escapeChar1 = '\u001B';
+char escapeChar2 = '\x1B';
+
+// In C# 13
+char escapeChar = '\e';
+
+// Using the escape character in a string for terminal control (e.g., changing text color)
+string coloredText = "\e[31mRed Text\e[0m";
+Console.WriteLine(coloredText);
+
+-------
+The implicit "from the end" index operator, ^, is now allowed in an object initializer expression
+public class TimerRemaining
+{
+    public int[] buffer { get; set; } = new int[10];
+}
+
+// In C# 13, you can now do this:
+var countdown = new TimerRemaining()
+{
+    buffer = { 
+        [^1] = 0, // Last element
+        [^2] = 1, // Second to last element
+        // ... and so on
+        [^10] = 9 // First element
+    }
+};
+
+-------
+A ref struct is a special kind of struct introduced in C# 7.2 that is always stack-allocated, not heap-allocated
+
+-------
+More partial members
+public partial class C
+{
+    // Declaring declaration
+    public partial string Name { get; set; }
+}
+
+public partial class C
+{
+    // implementation declaration:
+    private string _name;
+    public partial string Name
+    {
+        get => _name;
+        set => _name = value;
+    }
+}
+
+-------
+Overload resolution priority
+In C# 13, the compiler recognizes the OverloadResolutionPriorityAttribute to prefer one overload over another
+
+-------
+[InlineArray(n)] is an attribute that lets you define a stack-only fixed-size array inside a struct, 
+without using unsafe code or fixed buffers.
+Essentially, it’s a safe, modern alternative to fixed T[size] fields in unsafe structs
+
+[InlineArray(10)]
+public struct MyInlineArray
+{
+    private int _firstElement; // the compiler will generate the rest!
+}
+class Program
+{
+    static void Main()
+    {
+        var arr = new MyInlineArray();
+
+        for (int i = 0; i < 10; i++)
+            arr[i] = i * 2;
+
+        for (int i = 0; i < 10; i++)
+            Console.WriteLine(arr[i]);
+    }
+}
+
+-------
+Primary constructors
+public readonly struct Distance(double dx, double dy)
+{
+    public readonly double Magnitude { get; } = Math.Sqrt(dx * dx + dy * dy);
+    public readonly double Direction { get; } = Math.Atan2(dy, dx);
+}
+
+-------
+Collection expressions
+// Create an array:
+int[] a = [1, 2, 3, 4, 5, 6, 7, 8];
+int[] row0 = [1, 2, 3];
+int[] row1 = [4, 5, 6];
+int[] row2 = [7, 8, 9];
+int[] single = [.. row0, .. row1, .. row2];
+
+-------
+Alias any type
+You can use the using alias directive to alias any type, not just named types
+
+-------
+Experimental attribute
+Types, methods, or assemblies can be marked with the System.Diagnostics.CodeAnalysis.ExperimentalAttribute to indicate an experimental feature
+
+-------
+Raw string literals
+string longMessage = """
+    This is a long message.
+    It has several lines.
+        Some are indented
+                more than others.
+    Some should start at the first column.
+    Some have "quoted text" in them.
+    """;
+	
+-------
+Generic math support
+Tutorial: Explore C# 11 feature - static virtual members in interfaces
+C# 11 and .NET 7 include static virtual members in interfaces. This feature enables you to define interfaces that include 
+overloaded operators or other static members. Once you've defined interfaces with static members, you can use those 
+interfaces as constraints to create generic types that use operators or other static methods
+
+-------
+Generic attributes
+You can declare a generic class whose base class is System.Attribute.
+// Before C# 11:
+public class TypeAttribute : Attribute
+{
+   public TypeAttribute(Type t) => ParamType = t;
+
+   public Type ParamType { get; }
+}
+[TypeAttribute(typeof(string))]
+public string Method() => default;
+
+// C# 11 feature:
+public class GenericAttribute<T> : Attribute { }
+[GenericAttribute<string>()]
+public string Method() => default;
+
+-------
+Newlines in string interpolations
+The text inside the { and } characters for a string interpolation can now span multiple lines. 
+The text between the { and } markers is parsed as C#. Any legal C#, including newlines, is allowed. 
+This feature makes it easier to read string interpolations that use longer C# expressions, like pattern matching 
+switch expressions, or LINQ queries.
+
+-------
+List patterns
+List patterns extend pattern matching to match sequences of elements in a list or an array. 
+For example, sequence is [1, 2, 3] is true when the sequence is an array or a list of three integers (1, 2, and 3). 
+You can match elements using any pattern, including constant, type, property and relational patterns. 
+The discard pattern (_) matches any single element, and the new range pattern (..) matches any sequence of zero or more elements.
+
+Console.WriteLine(new[] { 1, 2, 3, 4, 5 } is [> 0, > 0, ..]);  // True
+Console.WriteLine(new[] { 1, 1 } is [_, _, ..]);  // True
+Console.WriteLine(new[] { 0, 1, 2, 3, 4 } is [> 0, > 0, ..]);  // False
+Console.WriteLine(new[] { 1 } is [1, 2, ..]);  // False
+
+-------
+File local types
+Beginning in C# 11, you can use the file access modifier to create a type whose visibility is scoped to the source 
+file in which it is declared. This feature helps source generator authors avoid naming collisions.
+
+file class HiddenWidget
+{
+    // implementation
+}
+
+-------
+Required members
+You can add the required modifier to properties and fields to enforce constructors and callers to initialize those values.
+public class Person
+{
+    public Person() { }
+
+    [SetsRequiredMembers]
+    public Person(string firstName) => FirstName = firstName;
+
+    public required string FirstName { get; init; }
+
+    // Omitted for brevity.
+}
+
+-------
+Extended nameof scope
+Type parameter names and parameter names are now in scope when used in a nameof expression in an attribute declaration on that method. 
+class MyAttribute : Attribute
+{
+    public MyAttribute(string name) { }
+}
+
+class Example
+{
+    [MyAttribute(nameof(param))] // ❌ Error before C# 12
+    void DoSomething(string param) { }
+}
+
+class Example
+{
+    [ValidateNotNull(nameof(input))] // ✅ parameter name in scope
+    void ProcessData(string input) { }
+}
+
+Antes...
+[ValidateNotNull("input")] // ❌ brittle: string literal
+
+-------
+Records
+public record Person(string FirstName, string LastName); // primary contructor
+
+public record Person // the first one is the prefered way 
+{
+    public required string FirstName { get; init; }
+    public required string LastName { get; init; }
+};
+
+
+-------
+Lambda expressions can have a natural type (delagate type), where the compiler can infer a delegate type from the 
+lambda expression or method group.
+
+Func<int, int> square = x => x * x; // ✅ OK
+var f = x => x * x; // ❌ Error: Cannot infer the type of lambda expression
+
+var square = (int x) => x * x; // ✅ Works in C# 10+
+Console.WriteLine(square(3));  // 9
+
+var multiply = static (int a, int b) => a * b;
+
+Here the compiler infers Func<int, int, int>
+and enforces that the lambda cannot capture outer variables (because it’s static).
+
+-------
+Lambda expressions can declare a return type when the compiler can't infer it
+var choose = (bool flag) => object
+{
+    if (flag) return 1;
+    else return "no";
+};
+
+var square = (int x) => double (x * x); // Type inferred: Func<int, double>
+
+-------
+Attributes can be applied to lambda expressions.
+var square = [return: MyReturnAttribute] (int x) => x * x;
+var square = [MyLambdaAttribute] (int x) => x * x;
+
+this goes internally to 
+
+[MyLambdaAttribute]
+private static int <Main>b__0_0(int x) => x * x;
+
+another example
+var format = [return: NotNull] (string? s) => s ?? string.Empty;
+
+-------
+CallerArgumentExpression attribute
+Typical use
+Argument validation, logging, diagnostics
+
+before 
+public static void CheckNotNull(object? obj, string paramName)
+{
+    if (obj is null)
+        throw new ArgumentNullException(paramName);
+}
+
+CheckNotNull(user, nameof(user));
+
+now
+public static void CheckNotNull(
+    object? value,
+    [CallerArgumentExpression("value")] string? paramName = null)
+{
+    if (value is null)
+        throw new ArgumentNullException(paramName);
+}
+
+CheckNotNull(user); 
+
+
+Related attributes
+This attribute joins a family of other “caller info” attributes:
+
+| Attribute                    | Injected info                        | Example result              |
+| ---------------------------- | ------------------------------------ | --------------------------- |
+| `[CallerFilePath]`           | Source file path                     | `"C:\MyProject\Program.cs"` |
+| `[CallerLineNumber]`         | Source line number                   | `42`                        |
+| `[CallerMemberName]`         | Calling member name                  | `"Main"`                    |
+| `[CallerArgumentExpression]` | Expression text for another argument | `"age > 0"`                 |
+
+-------
+class PersonPrivateSet
+{
+    public string FirstName { get; private set; }
+    public string LastName { get; private set; }
+    public PersonPrivateSet(string first, string last) => (FirstName, LastName) = (first, last);
+
+    public void ChangeName(string first, string last) => (FirstName, LastName) = (first, last);
+}
+
+class PersonReadOnly
+{
+    public string FirstName { get; }
+    public string LastName { get; }
+    public PersonReadOnly(string first, string last) => (FirstName, LastName) = (first, last);
+}
+
+class PersonInit
+{
+    public string FirstName { get; init; }
+    public string LastName { get; init; }
+}
+
+-------
+Pattern matching enhancements: relational patterns and logical patterns
+C# 9 introduced relational patterns and logical patterns, building on earlier switch and is pattern matching features.
+
+1. Relational patterns
+if (temperature is > 0 and < 100)
+{
+    Console.WriteLine("Liquid water");
+}
+
+static string Classify(double measurement)
+    => measurement switch
+    {
+        < 0 => "Negative",
+        0 => "Zero",
+        > 0 and < 10 => "Small",
+        >= 10 and < 100 => "Medium",
+        _ => "Large"
+    };
+
+-------
+static anonymous functions
+
+Func<int, int> square = static x => x * x;
+
+This lambda must not capture any variables or references from the enclosing scope (does not use closure)
+
+-------
+.Net Benchmark
+
+using System;
+using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Running;
+
+public class LambdaBenchmarks
+{
+    private readonly int factor = 10;
+    private readonly int[] data = new int[1000];
+
+    [Benchmark]
+    public int NonStaticLambda()
+    {
+        // Captures 'factor' → closure allocation
+        Func<int, int> multiply = x => x * factor;
+
+        int sum = 0;
+        foreach (var n in data)
+            sum += multiply(n);
+
+        return sum;
+    }
+
+    [Benchmark]
+    public int StaticLambda()
+    {
+        // No capture → no allocation
+        Func<int, int> multiply = static x => x * 10;
+
+        int sum = 0;
+        foreach (var n in data)
+            sum += multiply(n);
+
+        return sum;
+    }
+}
+
+public class Program
+{
+    public static void Main() => BenchmarkRunner.Run<LambdaBenchmarks>();
+}
+
+-------
+Target-typed new expressions
+
+record Point(int X, int Y);
+
+Point p1 = new(1, 2);
+Point p2 = p1 with { Y = 5 }; // isso aqui pode ser ultil na montade de testes
+
+-------
+Target-typed conditional expressions
+ILogger logger = debug
+    ? new ConsoleLogger()
+    : new FileLogger("log.txt");
+
+-------
+Covariant return types
+before
+class Animal { }
+class Dog : Animal { }
+
+class AnimalFactory
+{
+    public virtual Animal Create() => new Animal();
+}
+
+class DogFactory : AnimalFactory
+{
+    public override Animal Create() => new Dog(); // 😐 must return Animal
+}
+
+now
+class DogFactory : AnimalFactory
+{
+    public override Dog Create() => new Dog();
+}
+
+-------
+Lambda discard parameters
+Action<int, int> log = (_, _) => Console.WriteLine("Hello!");
+button.Click += (_, _) => Console.WriteLine("Clicked!");
+
+before
+button.Click += (sender, e) => Console.WriteLine("Clicked!");
+
+-------
+Attributes on local functions
+void Outer()
+{
+    [Obsolete("Use AnotherInner instead")]
+    void Inner()
+    {
+        Console.WriteLine("Old logic");
+    }
+
+    Inner(); // ✅ Compiler warns here due to the attribute
+}
+
+
+-------
+allows ref struct
+A ref struct is a special kind of struct introduced in C# 7.2 that is always stack-allocated, not heap-allocated.
+high-performance, low-allocation, span-based scenarios
+
+public class C<T> where T : allows ref struct
+{
+    // Use T as a ref struct:
+    public void M(scoped T p)
+    {
+        // The parameter p must follow ref safety rules
+    }
+}
+
+ref struct BufferSlice
+{
+    private Span<byte> _buffer;
+
+    public BufferSlice(Span<byte> buffer)
+    {
+        _buffer = buffer;
+    }
+
+    public void Fill(byte value)
+    {
+        _buffer.Fill(value);
+    }
+}
+-------
+ref readonly parameters
+C# added in parameters as a way to pass readonly references. in parameters allow both variables and values, 
+and can be used without any annotation on arguments.
+
+Reference parameters
+You apply one of the following modifiers to a parameter declaration to pass arguments by reference instead of by value:
+
+ref: The argument must be initialized before calling the method. The method can assign a new value to the parameter, but isn't required to do so.
+out: The calling method isn't required to initialize the argument before calling the method. 
+	 The method must assign a value to the parameter.
+ref readonly: The argument must be initialized before calling the method. The method can't assign a new value to the parameter.
+in:  The argument must be initialized before calling the method. The method can't assign a new value to the parameter. 
+	 The compiler might create a temporary variable to hold a copy of the argument to in parameters.
+
+-------
+Default lambda parameters
+You can now define default values for parameters on lambda expressions. The syntax and rules are the same as adding default values for arguments to any method or local function.
+
+-------
+Adding the global modifier to a using directive means that using is applied to all files in the compilation (typically a project):
+The using static directive names a type whose static members and nested types you can access without specifying a type name
+
+using S = System.Net.Sockets;
+
+using static System.Console;
+using static System.Math;
+class Program
+{
+    static void Main()
+    {
+        WriteLine(Sqrt(3*3 + 4*4));
+    }
+}
+
+Create a using alias directive to make it easier to qualify an identifier to a namespace or type
+namespace PC
+{
+    // Define an alias for the nested namespace.
+    using Project = PC.MyCompany.Project;
+    class A
+    {
+        void M()
+        {
+            // Use the alias
+            var mc = new Project.MyClass();
+        }
+    }
+    namespace MyCompany
+    {
+        namespace Project
+        {
+            public class MyClass { }
+        }
+    }
+}
+
+-------
+Configure options for the ASP.NET Core Kestrel web server
+builder.WebHost.ConfigureKestrel(serverOptions =>
+{
+    // ...
+});
+
+-------
+.NET Generic Host
+The .NET Generic Host is responsible for app startup and lifetime management
+Dependency injection (DI)
+Logging
+Configuration
+App shutdown
+IHostedService implementations
+When a host starts, it calls IHostedService.StartAsync on each implementation of IHostedService registered in the 
+service container's collection of hosted services. In a worker service app, all IHostedService implementations that 
+contain BackgroundService instances have their BackgroundService.ExecuteAsync methods called.
+
+-------
+Worker services in .NET
+There are numerous reasons for creating long-running services such as:
+
+Processing CPU-intensive data.
+Queuing work items in the background.
+Performing a time-based operation on a schedule.
+
+Background service processing usually doesn't involve a user interface (UI), but UIs can be built around them. 
+In the early days with .NET Framework, Windows developers could create Windows Services for these purposes. 
+Now with .NET, you can use the BackgroundService, which is an implementation of IHostedService, or implement your own.
+
+Background Service: The BackgroundService type.
+Hosted Service: Implementations of IHostedService, or the IHostedService itself.
+Long-running Service: Any service that runs continuously.
+Windows Service: The Windows Service infrastructure, originally .NET Framework-centric but now accessible via .NET.
+Worker Service: The Worker Service template (project template).
+
