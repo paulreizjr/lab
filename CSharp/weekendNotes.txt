@@ -1,0 +1,134 @@
+the universal algorithm
+
+start
+	while we are not done
+		do stuff
+	done
+	
+	
+10 software laws
+	you can never merely do one thing
+	
+Shipley's Six Dimensions
+	brevity of code
+	featurefulness
+	speed of execution
+	time spent coding
+	robusteness
+	flexibility
+	
+Iron triangle
+	good
+	fast
+	cheap
+	
+-------------
+heap 
+
+int dividend = 30;
+int divisor = 7;
+int remainder;
+int quotient = Math.DivRem(dividend, divisor, out remainder);
+// quotient is 4, remainder is 2
+
+first index is 1 (not zero)
+
+if a node is at index i
+its left child is at 	--> i * 2
+its right child is at	--> i * 2 + 1
+its parent is at		--> [i / 2]
+
+
+full binary tree 		--> 2^(h+1) - 1 = 2^3 - 1 = 7
+
+            A          h|0
+		  /   \         |
+		 B      C       |1
+       /  \    /  \     |
+	  D    E  F    G    |2
+
+[A,B,C,D,E,F,G]
+
+
+complete binary tree
+
+            A         
+		  /   \       
+		 B      C     
+       /  \   
+	  D    E  
+
+[A,B,C,D,E]
+	  
+incomplete binary tree
+
+            A         
+		  /   \       
+		 B      C     
+               /  \   
+	          F    G  
+			  
+[A,B,C,-,-,F,G]
+
+heap is always a complete binary tree
+
+max heap
+           50         
+		  /   \       
+		30     20     
+       /  \    /  \   
+	 15   10  8   16  
+	  
+min heap
+           10         
+		  /   \       
+		30     20     
+       /  \    /  \   
+	 35   40  32  25  
+
+ - insert elements at the last free space of the heap and then
+   adjust the heap
+   O(1) to O(log n)
+ - we can only delete the root element in a heap, which is
+   the firs element in the array, and the element that 
+   takes the root place is always the last element in the
+   array. After that, adjust the heap
+   O(log n)
+
+
+heapfy (the procedure to create a heap)
+
+heap sort has 2 steps
+ - create a heap 	--> O(n log n)
+   insert elements from the heap root 
+   (from left to the right in the array)
+ - heapfy			--> O(n)
+   each element in the last level is a heap without childrens 
+   (from the right to the left)
+   
+ - delete all the heap keeping the deleted element at the 
+   end of the array
+
+priority queue
+
+
+-----------------
+functional programming in c#
+
+expressions
+	var x = 1 + 1;
+statements
+	WriteLine("Statement")
+	
+-------------------
+cryptography
+
+using mathemagics to share secrets
+
+-------------------
+architecture 
+
+architect: the person who is responsible to choose what 
+is most expensive to change later and must to be done in advence 
+
+data api builder - dar uma olhada nisso

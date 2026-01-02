@@ -1,3 +1,31 @@
+--------- asp.net
+------- c#
+-------- Best practices for RESTful web API design
+
+
+---------
+ASP.NET Core support for Native AOT
+Minimized disk footprint
+Reduced deployment time from smaller images
+Reduced startup time
+Reduced memory demand
+
+---------
+Test ASP.NET Core middleware
+By Chris Ross
+
+Middleware can be tested in isolation with TestServer. It allows you to:
+
+---------
+Factory-based middleware activation in ASP.NET Core
+IMiddlewareFactory/IMiddleware is an extensibility point for middleware activation that offers the following benefits:
+
+Activation per client request (injection of scoped services)
+Strong typing of middleware
+
+---------
+
+
 The history of C#
 
 c#13
@@ -134,7 +162,8 @@ You can use the using alias directive to alias any type, not just named types
 
 -------
 Experimental attribute
-Types, methods, or assemblies can be marked with the System.Diagnostics.CodeAnalysis.ExperimentalAttribute to indicate an experimental feature
+Types, methods, or assemblies can be marked with the System.Diagnostics.CodeAnalysis.ExperimentalAttribute to indicate an 
+experimental feature
 
 -------
 Raw string literals
@@ -577,8 +606,15 @@ Configuration
 App shutdown
 IHostedService implementations
 When a host starts, it calls IHostedService.StartAsync on each implementation of IHostedService registered in the 
-service container's collection of hosted services. In a worker service app, all IHostedService implementations that 
+service container's collection of hosted services. In a worker service (template) app, all IHostedService implementations that 
 contain BackgroundService instances have their BackgroundService.ExecuteAsync methods called.
+
+-------
+There are three different hosts capable of running an ASP.NET Core app:
+
+ASP.NET Core WebApplication, also known as the Minimal Host
+.NET Generic Host combined with ASP.NET Core's ConfigureWebHostDefaults
+ASP.NET Core WebHost (only for backward compatibility)
 
 -------
 Worker services in .NET
@@ -598,3 +634,274 @@ Long-running Service: Any service that runs continuously.
 Windows Service: The Windows Service infrastructure, originally .NET Framework-centric but now accessible via .NET.
 Worker Service: The Worker Service template (project template).
 
+-------
+readonly struct
+You use the readonly modifier to declare that a structure type is immutable. 
+All data members of a readonly struct must be read-only as follows:
+
+public readonly struct Coords
+{
+    public Coords(double x, double y)
+    {
+        X = x;
+        Y = y;
+    }
+
+    public double X { get; init; }
+    public double Y { get; init; }
+
+    public override string ToString() => $"({X}, {Y})";
+}
+
+readonly instance members
+You can also use the readonly modifier to declare that an instance member doesn't modify the state of a struct. If you can't declare the whole structure type as readonly, use the readonly modifier to mark the instance members that don't modify the state of the struct.
+
+-------
+Local functions (C# Programming Guide)
+Local functions are methods of a type that are nested in another member. They can only be called from their containing member. 
+Local functions can be declared in and called from:
+
+Methods, especially iterator methods and async methods
+Constructors
+Property accessors
+Event accessors
+Anonymous methods
+Lambda expressions
+Finalizers
+Other local functions
+
+-------
+Ref returns
+By default, the return statement returns the value of an expression. You can return a reference to a variable. 
+Reference return values (or ref returns) are values that a method returns by reference to the caller. That is, the caller can 
+modify the value returned by a method, and that change is reflected in the state of the object in the called method
+
+int[] xs = new int [] {10, 20, 30, 40 };
+ref int found = ref FindFirst(xs, s => s == 30);
+found = 0;
+Console.WriteLine(string.Join(" ", xs));  // output: 10 20 0 40
+
+ref int FindFirst(int[] numbers, Func<int, bool> predicate)
+{
+    for (int i = 0; i < numbers.Length; i++)
+    {
+        if (predicate(numbers[i]))
+        {
+            return ref numbers[i];
+        }
+    }
+    throw new InvalidOperationException("No element satisfies the given condition.");
+}
+
+-------
+If you didn't author a class, struct, or interface, you can 
+still deconstruct objects of that type by implementing one 
+or more Deconstruct extension methods to return the values 
+in which you're interested.
+
+--------
+Representational State Transfer (REST)
+stateless
+HTTP protocol to perform operations on resources and return representations of resources that contain 
+>>hypermedia links<< and HTTP operation status codes.
+web API uses HTTP as a standard protocol, provides clear documentation, and supports a familiar data exchange format such as 
+JSON or XML.
+Uniform Resource Identifier (URI): REST APIs are designed around resources, which are any kind of object, data, 
+or service that the client can access
+Resource representation: format such as XML or JSON
+Uniform interface: using standard HTTP verbs to perform operations like GET, POST, PUT, PATCH, and DELETE on resources.
+Hypermedia links: REST APIs can be driven by hypermedia links that are contained in each resource representation.
+Define RESTful web API resource URIs
+https://api.contoso.com/orders // Good (with a post)
+https://api.contoso.com/create-order // Avoid
+https://api.contoso.com/orders (get traz as orders)
+https://api.contoso.com/orders/1 (get traz a order 1)
+
+Resource URI naming conventions
+Use nouns for resource names. Use nouns to represent resources. For example, use /orders instead of /create-order. 
+The HTTP GET, POST, PUT, PATCH, and DELETE methods already imply the verbal action.
+Consider the relationships between different types of resources and how you might expose these associations. 
+For example, the /customers/5/orders might represent all of the orders for customer 5
+	extending this model too far can become cumbersome to implement.
+	A better approach is to include links in the body of the HTTP response message so that clients can easily access related resources
+Avoid requiring resource URIs that are more complex than collection/item/collection.
+
+Avoid a large number of small resources
+For more information about these performance antipatterns, see Chatty I/O and Extraneous Fetching.
+
+Resource			POST								GET									PUT												DELETE
+/customers			Create a new customer				Retrieve all customers				Bulk update of customers						Remove all customers
+/customers/1		Error								Retrieve the details for customer 1	Update the details of customer 1 if it exists	Remove customer 1
+/customers/1/orders	Create a new order for customer 1	Retrieve all orders for customer 1	Bulk update of orders for customer 1			Remove all orders for customer 1
+
+GET - A GET request retrieves a representation of the resource at the specified URI
+200 (OK)	The method has successfully returned the resource.
+204 (No Content)	The response body doesn't contain any content, such as when a search request returns no matches in the HTTP response.
+404 (Not Found)	The requested resource can't be found.
+
+POST - A POST request should create a resource. The server assigns a URI for the new resource and returns that URI to the client
+POST request can also be used to submit data for processing to an existing resource, without the creation of any new resource.
+200 (OK)	The method has done some processing but doesn't create a new resource. The result of the operation might be included in the response body.
+201 (Created)	The resource was created successfully. The URI of the new resource is included in the Location header of the response. The response body contains a representation of the resource.
+204 (No Content)	The response body contains no content.
+400 (Bad Request)	The client has placed invalid data in the request. The response body can contain more information about the error or a link to a URI that provides more details.
+405 (Method Not Allowed)	The client has attempted to make a POST request to a URI that doesn't support POST requests.
+
+PUT request
+A PUT request should update an existing resource if it exists or, in some cases, create a new resource if it doesn't exist
+PUT methods are applied to resources that are individual items, such as a specific customer, instead of collections
+Whether to support creation via PUT depends on whether the client can meaningfully and reliably assign a URI to a resource 
+before it exists. If it can't, then use POST to create resources and have the server assign the URI. 
+Then use PUT or PATCH to update the URI.
+PUT requests must be idempotent, which means that submitting the same request multiple times always results in the same resource 
+being modified with the same values
+200 (OK)	The resource was updated successfully.
+201 (Created)	The resource was created successfully. The response body might contain a representation of the resource.
+204 (No Content)	The resource was updated successfully, but the response body doesn't contain any content.
+409 (Conflict)	The request couldn't be completed because of a conflict with the current state of the resource.
+
+PATCH requests
+This method can be more efficient than using PUT requests because the client only sends the changes and not the entire 
+representation of the resource
+200 (OK)	The resource was updated successfully.
+400 (Bad Request)	Malformed patch document.
+409 (Conflict)	The patch document is valid, but the changes can't be applied to the resource in its current state.
+415 (Unsupported Media Type)	The patch document format isn't supported.
+
+DELETE requests
+204 (NO CONTENT)	The resource was deleted successfully. The process has been successfully handled and the response body contains no further information.
+404 (NOT FOUND)	The resource doesn't exist.
+
+Resource MIME types
+Resource representation is how a resource that's identified by URI is encoded and transported over the HTTP 
+protocol in a specific format, such as XML or JSON.
+
+Implement asynchronous methods
+An asynchronous method should return HTTP status code 202 (Accepted)
+Include the URI of the status endpoint in the Location header of the 202 response
+Expose an endpoint that returns the status of an asynchronous request so that the client can monitor the status by 
+polling the status endpoint
+
+Implement data pagination and filtering
+GET /orders?limit=25&offset=50
+GET /orders?minCost=100&status=shipped
+
+Support partial responses
+HEAD https://api.contoso.com/products/10?fields=productImage
+	HTTP/1.1 200 OK
+	
+	Accept-Ranges: bytes
+	Content-Type: image/jpeg
+	Content-Length: 4580
+GET https://api.contoso.com/products/10?fields=productImage
+Range: bytes=0-2499
+A subsequent request from the client application can retrieve the remainder of the resource.
+
+Implement HATEOAS
+One of the primary reasons to use REST is the ability to navigate the entire set of resources without prior knowledge of the 
+URI schema. Each HTTP GET request should return the information necessary to find the resources related directly to the 
+requested object through hyperlinks included in the response
+
+Implement versioning
+URI versioning
+	https://api.contoso.com/v2/customers/3
+Query string versioning
+	https://api.contoso.com/customers/3?version=2
+Header versioning
+	GET https://api.contoso.com/customers/3
+	Custom-Header: api-version=1
+Media type versioning
+	GET https://api.contoso.com/customers/3
+	Accept: application/vnd.contoso.v1+json
+
+Multitenant web APIs
+A multitenant web API solution is shared by multiple tenants, such as distinct organizations that have their own groups of users.
+
+Enable distributed tracing and trace context in APIs
+As distributed systems and microservice architectures become the standard, the complexity of modern architectures increases. 
+Using headers, such as Correlation-ID, X-Request-ID, or X-Trace-ID, to propagate trace context in API requests is a best 
+practice to achieve end-to-end visibility.
+
+Web API maturity model
+Level 0: Define one URI, and all operations are POST requests to this URI. Simple Object Access Protocol web services are typically at this level.
+Level 1: Create separate URIs for individual resources. This level isn't yet RESTful, but it begins to align with RESTful design.
+Level 2: Use HTTP methods to define operations on resources. In practice, many published web APIs align approximately with this level.
+Level 3: Use hypermedia (HATEOAS). This level is truly a RESTful API, according to Fielding's definition.
+
+GET, PUT, DELETE, HEAD, and PATCH actions should be idempotent
+
+POST actions that create new resources should not have unrelated side-effects
+
+Avoid implementing chatty POST, PUT, and DELETE operations
+
+Follow the HTTP specification when sending a response
+For example, a POST operation should return status code 201 (Created) and the response message should include the 
+URI of the newly created resource in the Location header of the response message.
+
+Provide links to support HATEOAS-style navigation and discovery of resources
+
+Support client-side caching
+The HTTP 1.1, http/2 and http/3 protocol supports caching in clients and intermediate servers through which a 
+request is routed by the 
+use of the Cache-Control header
+
+Provide ETags to optimize query processing
+When a client application retrieves an object, the response message can also include an entity tag (ETag). 
+An ETag is an opaque string that indicates the version of a resource
+If a resource is large and requires a significant amount of bandwidth to transmit back to the client
+The client constructs a GET request containing the ETag for the currently cached version of the resource referenced in an 
+If-None-Match HTTP header
+
+Use ETags to Support Optimistic Concurrency
+If the current ETag for the requested data matches the ETag provided by the request, the resource has not changed and the web API 
+should perform the update
+
+Optimize requests and responses that involve large objects
+The HTTP protocol provides the chunked transfer encoding mechanism to stream large data objects back to a client.
+Transfer-Encoding: Chunked
+You can minimize the size of large objects transmitted over the network by using HTTP compression
+
+Avoid sending unnecessary 100-Continue status messages in client applications
+If you build client applications by using the .NET Framework, then all POST and PUT messages will first send messages with 
+Expect: 100-Continue headers by default.
+But this process results in each POST and PUT request causing two round-trips to the server, even for small requests. 
+If your application isn't sending requests with large amounts of data, you can disable this feature by using the 
+ServicePointManager class to create ServicePoint objects in the client application.
+
+Track clients and implement throttling to reduce the chances of DoS attacks
+
+Manage persistent HTTP connections carefully
+This behavior is the default in HTTP 1.1 as used by Azure services, so there's no need to include Keep-Alive headers in messages.
+HTTP/1.0
+ - No persistent connections by default.
+ - Server closes the TCP connection after every response.
+ - Clients could request persistence using: Connection: keep-alive
+ - But it wasn’t standardized; behavior varied.
+HTTP/1.1
+ - Persistent connections are ON by default.
+ - A connection stays open for multiple requests/responses unless: Connection: close is sent by either side.
+ - Limitation: one TCP connection is serialized — only one outstanding request is processed at a time (unless pipelined, but it’s still serialized).
+HTTP/2
+ - Still uses one TCP connection but supports multiplexing.
+ - Multiple parallel streams run concurrently across one connection.
+ - Header compression (HPACK).
+ - Persistent connections are still the norm.
+ - No need for “Keep-Alive” because the protocol assumes persistence. 
+HTTP/3
+ - Runs over QUIC (UDP) instead of TCP.
+ - Fixes TCP’s head-of-line blocking completely.
+ - Multiplexing per stream is native.
+ - Connection migration (mobile networks).
+ - Again, no Keep-Alive concept.
+kestrel suporta todas as versoes do http. A escolha de qual versao vai ser usada ocorre no TLS handshake
+is possible to test keep-alive behavior using Postman, curl, or browser dev tools
+
+Document the REST operations for a web API
+The Azure API Management Service includes a developer portal that describes the REST operations exposed by a web API
+
+Implement a client SDK
+
+Monitoring a web API directly
+ASP.NET Application Insights. Application Insights is a package that transparently tracks and records information about requests and responses when the web API is deployed to the cloud
+
+Monitoring a web API through the API Management Service
