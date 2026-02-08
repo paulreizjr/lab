@@ -1,6 +1,250 @@
-@jwt_HostAddress = http://localhost:5235
+###############################################################################
+# JWT Authentication API - HTTP Test File
+# 
+# PURPOSE:
+# - Provides ready-to-use HTTP requests for testing JWT authentication
+# - Demonstrates the complete authentication flow
+# - Shows how to use JWT tokens in API requests
+#
+# HOW TO USE:
+# 1. Run the application (dotnet run)
+# 2. Click "Send Request" above each request in VS Code
+# 3. Copy the token from login response
+# 4. Replace {{token}} with actual token in subsequent requests
+#
+# REQUIRES:
+# - REST Client extension for VS Code
+# - OR use these as templates for Postman/Insomnia
+###############################################################################
 
-GET {{jwt_HostAddress}}/weatherforecast/
-Accept: application/json
+@baseUrl = https://localhost:5001
+@token = YOUR_TOKEN_HERE
+
+###############################################################################
+# PUBLIC ENDPOINTS - No Authentication Required
+###############################################################################
+
+### 1. Test Public Endpoint (No token needed)
+# PURPOSE: Verify API is running and accessible
+# EXPECTED: 200 OK with public data
+GET {{baseUrl}}/api/securedata/public
+Content-Type: application/json
+
+###############################################################################
+# AUTHENTICATION FLOW
+###############################################################################
+
+### 2. Login - Get JWT Token
+# PURPOSE: Authenticate user and receive JWT token
+# SCENARIO: User logs in with username and password
+# EXPECTED: 200 OK with token, expiration, and user info
+# 
+# MOCK CREDENTIALS:
+# - Any username with password "password123"
+# 
+# WHEN TO USE:
+# - Initial user authentication
+# - After token expires
+# - After user logout
+#
+# WHEN NOT TO USE:
+# - If you already have a valid token
+# - For OAuth/SSO scenarios (use different endpoint)
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "john.doe",
+  "password": "password123"
+}
+
+###
+# Expected Response:
+# {
+#   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+#   "expiration": "2026-01-19T15:30:00Z",
+#   "username": "john.doe",
+#   "email": "john.doe@example.com",
+#   "roles": ["User", "Manager"]
+# }
+# 
+# NEXT STEP: Copy the "token" value and replace {{token}} variable above
+
+### 3. Register New User
+# PURPOSE: Create new user account and get token
+# SCENARIO: New user signs up
+# EXPECTED: 200 OK with token for new user
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+  "username": "jane.smith",
+  "password": "password123"
+}
+
+###############################################################################
+# PROTECTED ENDPOINTS - Require Valid JWT Token
+###############################################################################
+
+### 4. Get Protected Data - Requires Authentication
+# PURPOSE: Access user-specific data
+# SCENARIO: Authenticated user accessing their data
+# EXPECTED: 200 OK with personalized data
+# ERROR: 401 Unauthorized if token missing/invalid
+#
+# WHEN TO USE:
+# - Accessing user-specific resources
+# - User profile data
+# - Personal dashboards
+#
+# TOKEN FORMAT:
+# Authorization: Bearer <token>
+# Must include "Bearer " prefix followed by token
+GET {{baseUrl}}/api/securedata/protected
+Authorization: Bearer {{token}}
+
+###
+# Expected Response with valid token:
+# {
+#   "message": "This data is only accessible with valid JWT token",
+#   "userId": "12345",
+#   "username": "john.doe",
+#   "email": "john.doe@example.com",
+#   "accessLevel": "Authenticated User"
+# }
+
+### 5. Get Current User Info
+# PURPOSE: Retrieve authenticated user's profile
+# SCENARIO: Get "me" endpoint - common pattern
+# EXPECTED: 200 OK with current user data from token claims
+GET {{baseUrl}}/api/securedata/me
+Authorization: Bearer {{token}}
+
+### 6. Get Custom Claims Data
+# PURPOSE: Access application-specific claims from JWT
+# SCENARIO: Retrieve department, employee ID, or other custom data
+# EXPECTED: 200 OK with custom claims
+#
+# WHEN TO USE:
+# - Multi-tenant applications (tenant ID)
+# - Department-specific features
+# - Custom permissions or flags
+GET {{baseUrl}}/api/securedata/custom-claims
+Authorization: Bearer {{token}}
+
+###############################################################################
+# ROLE-BASED AUTHORIZATION
+###############################################################################
+
+### 7. Management Endpoint - Requires Manager or Admin Role
+# PURPOSE: Access management features
+# SCENARIO: Manager accessing team reports
+# EXPECTED: 200 OK if user has Manager or Admin role
+# ERROR: 403 Forbidden if user lacks required role
+#
+# WHEN TO USE:
+# - Multi-role authorization (OR logic)
+# - Hierarchical permissions
+#
+# WHEN NOT TO USE:
+# - Complex business logic (use policy-based auth)
+# - Fine-grained permissions (use claims-based auth)
+GET {{baseUrl}}/api/securedata/management
+Authorization: Bearer {{token}}
+
+### 8. Admin Endpoint - Requires Admin Role
+# PURPOSE: Access administrative functions
+# SCENARIO: Admin managing system settings
+# EXPECTED: 200 OK if user has Admin role
+# ERROR: 403 Forbidden if user is not admin
+#
+# WHEN TO USE:
+# - Administrative operations
+# - System configuration
+# - User management
+# - Sensitive operations
+#
+# ROLE CHECKING:
+# Token must contain role claim with value "Admin"
+GET {{baseUrl}}/api/securedata/admin
+Authorization: Bearer {{token}}
+
+###############################################################################
+# DATA OPERATIONS WITH AUTHENTICATION
+###############################################################################
+
+### 9. Update User Profile
+# PURPOSE: Update authenticated user's profile
+# SCENARIO: User changes display name, phone, etc.
+# EXPECTED: 200 OK with confirmation
+#
+# SECURITY NOTE:
+# User ID comes from token claims, not request body
+# Prevents users from modifying other users' data
+POST {{baseUrl}}/api/securedata/update-profile
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "displayName": "John Doe Updated",
+  "phoneNumber": "+1-555-0123",
+  "bio": "Software Developer"
+}
+
+### 10. Access User-Owned Resource
+# PURPOSE: Access resource owned by authenticated user
+# SCENARIO: User accessing their own document
+# EXPECTED: 200 OK if user owns document
+# ERROR: 403 Forbidden if user doesn't own document
+#
+# WHEN TO USE:
+# - Resource ownership verification
+# - User-specific data isolation
+# - Multi-tenant data access
+GET {{baseUrl}}/api/securedata/document/123
+Authorization: Bearer {{token}}
+
+###############################################################################
+# ERROR SCENARIOS - Testing Authentication Failures
+###############################################################################
+
+### 11. Test Missing Token
+# PURPOSE: Verify API properly handles missing authentication
+# SCENARIO: Client forgets to include token
+# EXPECTED: 401 Unauthorized
+#
+# WHEN THIS HAPPENS:
+# - Token not sent in request
+# - Authorization header missing
+GET {{baseUrl}}/api/securedata/protected
+
+### 12. Test Invalid Token
+# PURPOSE: Verify API rejects tampered/invalid tokens
+# SCENARIO: Token has been modified or is malformed
+# EXPECTED: 401 Unauthorized
+#
+# WHEN THIS HAPPENS:
+# - Token signature doesn't match
+# - Token format is invalid
+# - Token is corrupted
+GET {{baseUrl}}/api/securedata/protected
+Authorization: Bearer invalid_token_here
+
+### 13. Test Invalid Credentials
+# PURPOSE: Verify login rejects wrong passwords
+# SCENARIO: User enters wrong password
+# EXPECTED: 401 Unauthorized
+#
+# WHEN THIS HAPPENS:
+# - Password doesn't match
+# - Username doesn't exist
+# - Account is locked
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "john.doe",
+  "password": "wrongpassword"
+}
 
 ###
