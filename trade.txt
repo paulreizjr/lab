@@ -1,0 +1,303 @@
+last trade
+0511
+
+ctrl + p = volume por preço 
+vwap = volume weighted average price = somatoria(preco x volume) / volume
+
+setup
+ - diario
+	- fibonacci sempre a partir dos maiores volumes e mais em movimentos de dois dias, as vezes mais, mas o foco sao dois dias, iniciando no maior volume, terminando no menor sempre 
+	- media de fechamentos de 5 dias (semanal), media das maximas de 5 dias, media das minimas de 5 dias 
+	- volume financeiro com media de 21 (mensal) dias (media do volume mesmo)
+	- vwap com agrupamento diario
+	=> estratégia 
+	- o principal é sempre observar o volume. em geral, volume caindo espera, volume subindo atenção
+	- volume subindo num extremo normalmente é início de correção, muita atenção nisso 
+	- pontos de entrada convergentes (juntando mais de um indicador sempre)
+	- ponto de entrada: linha de fibo atrás de uma das médias semanais 
+	- ponto de entrada: máxima ou mínima do dia anterior atrás de uma das médias semanais 
+ - 10 minutos 
+	- fibonacci no último dia ou nos dois últimos dias 
+	- uma linha no último fechamendo outra no penúltimo fechamento 
+	- uma linha no último vwap outra no penúltimo vwap
+	- linhas de tendência, sempre partindo do dia de maior volume ou de um candle num extremo do diário 
+	- media das máximas de 55 (diária), média das mínimas de 55 
+	- média de 21 (3 horas e meia)
+	- volume financeiro com média de 21 (3 horas e meia). Foco é identificar quando o volume deixa de ser relevante no dia (média começa a cair)
+	=> estratégia 
+	- a tendência inicia e pode acelerar, desacelerar, vai acompanhando e marcando as linhas, nao precisa apagar. Mas sempre trace a tendência a partir do dia com maior volume
+	- a tendência é o que o institucional está fazendo 
+	- tendência sempre é (de alta no caso): 
+		1 fundo abaixo da média diária com volume alto, sempre comece num dia de volume alto 
+		2 topo acima da média diária, 
+		3 fundo abaixo da média diária mais alto que o fundo 1, 
+		4 topo acima da média diária mais alto que o topo 2
+	- a ideia é sempre buscar entrar em pontos de convergência entre esses indicadores no sentido das linhas de tendência (que é o que o institucional está fazendo), e sempre observando o volume, tanto do dia, quanto do candle de 10 min que chegou no ponto de convergência
+	- linhas de tendência, máximas, mínimas, 50% de fibo, todos esses pontos, quando estão atrás das médias, formam uma convergência muito forte, especialmente se a média de 21 estiver a frente da média diária
+	- o preço cai mas o vwap sobe numa tendência de alta: o mercado fez uma correção e deve voltar a subir
+ - 60 minutos
+	- uso apenas para monitorar o volume do dia, comparando hora a hora com o dia anterior, identificando como está o volume do dia em relação ao dia anterior, hora a hora
+
+topo -> media diaria -> topo -> media diaria
+fundo -> media diaria -> fundo -> media diaria
+
+precisamos achar pontos de convergencia de indicadores. sempre usamos o volume com outra coisa, tipo 
+um 50% de fibo, uma minima ou maxima, e isso eh bom. vamos tentar listar as convergencias dentro 
+de tudo que trabalhamos, e buscar por elas no grafico. essa eh uma otima ideia no sentido de padronizar
+nosso operacional
+ - divergencias 
+	- preço sobe no diário, mas cai no preço medio ponderado por volume VWAP
+ - convergencias 
+	- grafico diario, a maxima do dia anterior esta acima da media de maximas semanal (5) numa tendencia 
+	  de baixa. vamos ter uma super resistencia nesse ponto. se o preço bate la com volume, no inicio do 
+	  dia, vai dar venda intensa e rapida
+	- grafico de 10 min, tendencia de alta, media de 21 acima da media diaria (55), preço desce rapido e 
+	  pega a media de 55 com a media de 21 ainda acima da 55. preço tende forte a reagir na media de 55
+	- grafico de 10 min, pegar uma maxima, ou minima, ou 50% de fibo, ou fechamento, do dia anterior ou 
+	  o penultimo dia, qualquer um desses pontos, logo atras de uma media, seja a diaria de 55 ou a de 21
+	- teste: pega o VWAP do dia anterior e coloca ele no grafico de 10 min e coloque o fibo e veja se 
+	  tira alguma informacao disso 
+
+temos sempre um movimento principal e movimentos secundarios dentro do principal. sempre trabalhe 
+no sentido do movimento principal!! destaque ele no grafico!! 
+
+vamos considerar o movimento principal o penultimo movimento, de dois dias.. vamos buscar trabalhar 
+sempre no sentido do penultimo movimento, desde que o penultimo e o anti-penultimo estejam no mesmo
+sentido 
+
+sempre trace uma linha de tendencia nos movimentos... estamos trabalhando sempre com movimentos de 
+dois dias, as vezes 3... mas a linha de tendencia eh uma fonte a mais de informacao, e boa 
+
+se o preço desloca no mesmo sentido do vwap, mas mais que o preço medio vwap, provavelmente mercado vai buscar uma correção? parece q sim...
+se o preço desloca menos que o preço medio vwap, mercado acumulou? parece q sim
+
+presta atencao pois as vezes vc tem dois movimentos pra baixo, mas o ultimo esta mais alto que o primeiro.
+tipo o topo e o fundo do segundo movimento estao mais altos que os do primeiro. sao dois movimentos de 
+baixa mas isso eh incoerente.
+
+monte o movimento sempre com o maior movimento no primeiro dia e o menor movimento no segundo... assim
+a gente foca mais em quando o volume voltar, entende?
+
+coloque o fibo atual no grafico de 10 minutos e preste muita atenção como ele foi no detalhe. como 
+foi a relação com a linha de 50%, se teve relação, etc.
+
+uma coisa muito interessante eh pegar um dia onde o volume sobe, e no dia seguinte, assim que o dia atual
+rompe o limite maximo ou minimo do dia anterior onde o volume subiu, e recua no sentido contrario, 
+começamos a procurar oportunidade de entrar, pois sabemos que no 50% do fibo do dia anterior combinado
+com o dia atual, vai ter muita resistencia, visto que o dia anterior subiu o volume. com isso da pra
+fazer isso varias entradas 
+
+tendencia de alta no movimento principal, abrindo acima da media, compra, pois a media vai ser um 
+bom ponto de resistencia (media diaria digo)
+
+tonto: a tendencia principal eh pra onde os dois ultimos movimentos foram. movimento eh um dia com alto 
+volume, seguido de um dia de volume menor. a tendencia principal eh o que o institucional esta fazendo.
+
+
+ - o que o institucional ta fazendo baseado no volume diario? 
+   considere dois movimentos no mesmo sentido, com volume, confirmando apos a perda de uma max ou min do dia 
+   anterior. por ex, mercado desceu uns dias, entao um candle de um dia supera a maxima do dia anterior
+   (e de preferencia d0 superando uma média semanal de máxima ou mínima)   e 
+   volta a cair com volume, digo que esta vendendo
+   * o topo de um candle anterior eh uma excelente oportunidade para o vendedor... se o preço volta no topo 
+   do candle anterior, dentro de uma tendencia de baixa, e nao acelera pra baixo, a tendencia morreu ou 
+   esta morrendo! olhe isso muito bem!
+	comprando
+ - nos dias q ta caindo muito, fique de olho na media diaria no grafico de 10 minutos. costuma ser uma boa 
+   oportunidade para entrar no mercado, especialmente quando a media de 21 (210 minutos) está acima das 
+   médias diárias (na alta) e o preço desce RAPIDO e troca as medias diarias (agulhada do didi?) eh uma 
+   otima oportunidade de compra
+ - o preço pegando uma maxima do dia anterior e atrás da media de maximas de uma semana, eh muito pontente
+ - sempre monitore o volume do dia no grafico de 60 minutos. compare hora a hora, 
+   especialmente nas primeiras horas, se o volume do dia esta subindo ou descendo em relacao ao volume
+   hora a hora do dia anterior
+ - estou olhando onde, de acordo com o q mapeei previamente sobre o institucional, o volume deve subir
+   em na direcao do institucional. se o preço esta subindo e um dia d0 pega a minima de d-1
+   o volume precisa subir e reagir forte pra cima. 
+   no grafico de 10 min estou olhando o comportamento de d-1 em relacao a d-2, especialmente 
+   como o preco se comporta ao bater numa maxima ou minima de d-2... reagiu de acordo com a tendencia??
+   com volume??
+ - o preço subiu ate o topo do dia anterior antes de meio dia, que é onde o volume mais importa,
+   (excelente lugar para os vendedores) e nao fez uma nova minima 
+   no dia atual. Vendedores estao fracos. Use as marcacoes de maxima, minima e fechamento de d-2. veja 
+   como d-1 se comportou em relacao a essas marcas. d-0 deve ser uma continuacao de d-1 que eh uma continuacao
+   de d-2
+ - preço esta reagindo nas medias diarias em determinado sentido? 
+   se sim nao aposte contra a media sem antes o preço a testar
+    sim
+ - abriu e fechou dentro das medias deixando um cabelinho (sombra) pra fora das medias subindo volume? 
+   no mesmo sentido do institucional? se sim bom sinal de entrada
+	nao
+ - deixou cabelinho no meio das medias fechando fora das medias subindo volume?
+   no mesmo sentido do institucional? se sim bom sinal de entrada
+	sim sim 
+ - preço virou em um ponto de fibo (0, 50+ ou 100) subindo volume?
+   no mesmo sentido do institucional? se sim bom sinal de entrada
+	sim 
+ - nao subiu volume em um extremo? se subiu cuidado! mal sinal para entrada 
+   quando o volume sobre num extremo muito provavelmente o mercado vai buscar uma correcao do movimento atual
+	nao
+
+tool 0 - estou usando a media das maximas semanal no diario (5 periodos) e a media das minimas semanal no 
+diario. as duas juntas. Quando o mercado faz um candle com sobra pra fora dessas medias subindo volume, 
+nunca aposte contra esse movimento. cabelinho pra fora das medias com volume, nao entre contra o sentido 
+desse movimento nunca.
+
+tool 1 - o que o institucional esta fazendo?
+	hoje vc vai comprar ou vender? 
+	eu vou buscar oportunidade de fazer o que o institucional esta fazendo 
+	eu vejo os ultimos dias com alto volume (a pegada do institucional) e vejo pra onde o mercado andou na sequencia
+	se andou pra cima, eu vou buscar oportunidade de compra! 
+
+tool 5 - nao aposte. saiba o que está fazendo e porque está fazendo
+	foque nos pontos de luta, topos, fibos, eh nesses pontos que o volume sobe e vc ve quem ta vencendo
+
+tool 2 - regioes de virada de preço
+ - uma outra opcao (e ate mais facil) eh pegar os topos e fundos verdadeiros nas tendencias e marcar
+	topo verdadeiro eh quando o preço sobe acima da media e depois volta pra baixo fazendo um novo minimo
+	se o mercado tiver subindo, foque nos fundos, se estiver caindo, foque nos topos 
+	um movimento completo faz pelo menos 50% do mov anterior... se nao bateu 50 e inverteu, espere... 
+
+tool 3 - disparos em tendencia 
+o mercado qdo em tendencia tem dia que dispara na abertura e tem dia que ele faz um mergulho
+ele costuma disparar na abertura quando no dia anterior ele vai na minima (ou proximo dela) do penultimo dia e sobe de novo COM VOLUME (caso de alta)
+repare isso, quando tem muitos dias que ele nao pega a minima do dia anterior, espere, pois ele vai fazer isso uma hora
+e quando ele fizer, entre!
+
+tool 4 - linhas de tendencia 
+use linhas de tendencia... elas sozinhas nao sao nada, como tudo no trade sozinho nao eh nada
+mas elas sao uma fonte a mais de informacao sempre. pegue o pico do movimento atual no grafico de 1 h
+estou usando o grafico de 1 h e a media de 21, q da mais de dois dias no grafico de 1 h
+sempre que o preço cruza a media de 21 e faz um novo pico para o outro lado, eu atualizo a linha de tendencia
+sempre saindo da origem do movimento e passando pelo ultimo cruzamento da media que gerou o novo pico
+ - marque projecoes de fibonacci no diario pegando movimentos de tendencia, ou seja, movimentos onde
+	os dias vao fazendo topos e fundos maiores sequencialmente (ou menores se for queda)
+
+*tool 6 - fique atendo ao ultimo movimento na tendencia. as vezes o preço inverte a tendencia mas faz 
+isso dentro do ultimo movimento da tendencia anterior. Tem que esperar ele sair do ultimo movimento 
+da tendencia anterior, COM VOLUME, antes de apostar na nova tendencia. voce pode considerar o movimento
+que se cria fora do ultimo movimento da ultima tendencia, mas nao entre antes de ter volume no diario
+confirmarndo este movimento
+
+pra avaliar um candle corretamente vc precisa considerar 
+	o local onde ele aparece
+	a figura que ele forma
+	e o volume em relacao aos dias anteriores e tal 
+eu andei despresando candles em local e formato indicando uma coisa porque o volume nao era compativel
+mas nesse caso era 2 a 1 entende?
+
+avaliar o volume no diario
+	quando o mercado esta se posicionando para um grande movimento o volume diminui
+	quando o volume esta crescendo consistentemente o mercado esta moldando um grande movimento
+	quando o volume cresce em um extremo existe uma boa tendencia de o mercado estar mudando de direcao 
+	estude mais sobre volume
+
+os grandes players sao os donos do mercado. eu sou um colaborador deles.
+quando o volume sobe, o mercado esta na posição que eles querem 
+quando o volume desce o mercado nao esta na posição que eles querem e eles estao posicionando o mercado para a posição ideal
+quando o mercado volta a posição ideal, o volume sobe novamente 
+e esse ciclo se repete 
+
+sempre sempre espere o primeiro candle do grafico de 10 minutos e olho o volume dele... se ele veir abaixo dos ultimos 3 dias, espere!! esse candle nao pode vir sem volume num dia normal
+
+---------------------------------------------------------------------------------------------------------
+to ana c
+https://www.youtube.com/watch?v=L0HmBGWOlCM&list=RDL0HmBGWOlCM&start_radio=1
+https://www.youtube.com/watch?v=zLmFEIksvh8&list=RDL0HmBGWOlCM&index=2
+https://www.youtube.com/watch?v=C9Igc1gRU64&list=RDC9Igc1gRU64&start_radio=1
+https://www.youtube.com/watch?v=7MyUqiv2ATU&list=RD7MyUqiv2ATU&start_radio=1
+https://www.youtube.com/watch?v=QhMmBlL81nw&list=RDQhMmBlL81nw&start_radio=1
+https://www.youtube.com/watch?v=TN2SF_6OD0g&list=RDTN2SF_6OD0g&start_radio=1 -- 
+https://www.youtube.com/watch?v=BRVcm896Pkk&list=RDBRVcm896Pkk&start_radio=1
+https://www.youtube.com/watch?v=6JtPQPy-uyA&list=RD6JtPQPy-uyA&start_radio=1
+https://www.youtube.com/watch?v=Y5vuqNI7ZUw&list=RDY5vuqNI7ZUw&start_radio=1
+https://www.youtube.com/watch?v=OrzuR_LTemk&list=RDOrzuR_LTemk&start_radio=1 -- 
+https://www.youtube.com/watch?v=qt_OkgSOrkU&list=RDqt_OkgSOrkU&start_radio=1
+https://www.youtube.com/watch?v=zLmFEIksvh8&list=RDzLmFEIksvh8&start_radio=1
+https://www.youtube.com/watch?v=Gqk7DocjQ3w&list=RDviimfQi_pUw&index=3 ---
+https://www.youtube.com/watch?v=MhWzW1eFEbQ&list=RDMhWzW1eFEbQ&start_radio=1
+
+
+
+to thauany
+https://www.youtube.com/watch?v=J3UjJ4wKLkg&list=RDJ3UjJ4wKLkg&start_radio=1
+
+essa lana del rey eu curto muito 
+https://www.youtube.com/watch?v=cE6wxDqdOV0&list=RDcE6wxDqdOV0&start_radio=1
+sao musicas meio malancolicas, mas acho muito massa 
+
+to vendo aqui na minha lista de favoritos do spotify q tem muito billie ellish, vc gosta?
+https://www.youtube.com/watch?v=EgBJmlPo8Xw&list=RDEgBJmlPo8Xw&start_radio=1
+
+uma eletronica, me lembra sp 2012
+https://www.youtube.com/watch?v=vPJA3Be4ZYc&list=RDJ3UjJ4wKLkg&index=2
+
+essa aqui eh dos velhinhos q eu adoro, os rolling stones
+https://www.youtube.com/watch?v=B-2MenrnR2U&list=RDB-2MenrnR2U&start_radio=1
+
+
+mae da Luiza
+https://youtu.be/IY0xshOjHf4?si=R0GMfOjocbEc_u_c
+ex esposa
+https://youtu.be/1vS8tawCMrE?si=alCd3wqN4NWDQqTl
+um rolo longo
+https://youtu.be/CBTOGVb_cQg?si=AqFEzenDh71RJUd_
+
+voh
+https://youtu.be/HOWAyBbN3C0?si=ioJyKBIWDiazfJPy
+
+
+gospel das favoritas 
+https://www.youtube.com/watch?v=PfpEefKiG2I&list=RDPfpEefKiG2I&start_radio=1
+minha familia eh envangelica, eu cresci em igreja. por isso gosto de gospel 
+eu acho lindo o culto, a fé, e pra mim esse eh o unico proposito, ser bonito... ah e fazer a gente dormir bem, claro rss
+essa eh do U2 baseada no Salmo 40, acho linda
+https://youtu.be/rt0TTa9R09k?si=w3VcE4GmA-BAxBs5
+
+cat power
+https://youtu.be/QT9qM99l9Yk?si=chQzqn0Yl-B4m7J3
+muito bonita
+
+ouvi muito...
+https://www.youtube.com/watch?v=WJTXDCh2YiA&list=RDWJTXDCh2YiA&start_radio=1
+
+
+mais de mulheres da minha lista 
+https://www.youtube.com/watch?v=DqoLMGSBGYc&list=RDDqoLMGSBGYc&start_radio=1
+https://youtu.be/zpzdgmqIHOQ?si=o4REQ-P3ItdCi4Du
+
+musica de homem rsrss
+https://youtu.be/YlUKcNNmywk?si=-Yvofe_C7xev9_Gd
+
+essa eh muito bonita
+https://youtu.be/r2vGa-yLiso?si=e-JYmnJ9ECRpM3b2
+
+
+essas aqui sao pra vc namorar seu garoto rss
+https://www.youtube.com/watch?v=A1Ec26-h0Tk&list=RDA1Ec26-h0Tk&start_radio=1
+https://www.youtube.com/watch?v=pzF7LVHnKi4&list=RDpzF7LVHnKi4&start_radio=1
+https://youtu.be/wADRRYNHhOA?si=tU_bI0iVOX2myl-H
+https://www.youtube.com/watch?v=FiBEm8p_Paw&list=RDFiBEm8p_Paw&start_radio=1
+
+
+e ja q vc gosta de belchior, vai que...
+https://www.youtube.com/watch?v=6vPPCooBoP0&list=RD6vPPCooBoP0&start_radio=1
+
+coisas novas q tenho ouvido (sem conhecer)
+https://youtu.be/rjTdsB7LT7w?si=7lmbIwaZPTxVMOu-
+https://www.youtube.com/watch?v=MBqzrj18S2w&list=RDMBqzrj18S2w&start_radio=1
+thauany espero e acredito q vc nunca use nenhum tipo de droga.. eu usei varias, e ainda bebo (alcool eh droga), e vou te contar qual eh a melhor e mais potente droga q existe: ter vinte e poucos anos... a juventude eh uma droga incrivel!! e dessa vc nao pode escapar, aproveite! 
+
+
+
+rock velho bom 
+https://youtu.be/40V9_1PMUGM?si=xE5ZqDOX5-gDPK6d
+https://youtu.be/16zvMPHNAn4?si=jX2tXZ-cB3cEsWY2
+
+
+ja fiz aula de piano, nessa epoca eu gostava de jazz... e o herbie hancock era um cara q eu admirava.. admirava outros famosos, timo miles davis, john coltraine (devo ta escrevendo errado)
+https://www.youtube.com/watch?v=2VN8zH366M8&list=RD2VN8zH366M8&start_radio=1
+
+falar no john coltrane aqui esta o disco mais famoso dele, love supreme... eu acho lindo, veja o q vc acha
+https://youtu.be/ll3CMgiUPuU?si=N_YQmu_G_hHm9XVV
+
