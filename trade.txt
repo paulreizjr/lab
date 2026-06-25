@@ -1,12 +1,13 @@
 last trade
-0511
+0601
 
 ctrl + p = volume por preço 
 vwap = volume weighted average price = somatoria(preco x volume) / volume
 
 setup
  - diario
-	- fibonacci sempre a partir dos maiores volumes e mais em movimentos de dois dias, as vezes mais, mas o foco sao dois dias, iniciando no maior volume, terminando no menor sempre 
+	- fibonacci sempre a partir dos maiores volumes e mais em movimentos de dois dias, as vezes mais, 
+	  mas o foco sao dois dias, iniciando no maior volume, terminando no menor sempre 
 	- media de fechamentos de 5 dias (semanal), media das maximas de 5 dias, media das minimas de 5 dias 
 	- volume financeiro com media de 21 (mensal) dias (media do volume mesmo)
 	- vwap com agrupamento diario
@@ -17,79 +18,110 @@ setup
 	- ponto de entrada: linha de fibo atrás de uma das médias semanais 
 	- ponto de entrada: máxima ou mínima do dia anterior atrás de uma das médias semanais 
  - 10 minutos 
-	- fibonacci no último dia ou nos dois últimos dias 
+	- fibonacci no último dia, ou nos dois últimos dias, os nos mesmos dias do grafico diário
 	- uma linha no último fechamendo outra no penúltimo fechamento 
 	- uma linha no último vwap outra no penúltimo vwap
 	- linhas de tendência, sempre partindo do dia de maior volume ou de um candle num extremo do diário 
 	- media das máximas de 55 (diária), média das mínimas de 55 
 	- média de 21 (3 horas e meia)
-	- volume financeiro com média de 21 (3 horas e meia). Foco é identificar quando o volume deixa de ser relevante no dia (média começa a cair)
+	- volume financeiro com média de 21 (3 horas e meia). Foco é identificar quando o volume deixa de ser 
+	  relevante no dia (média começa a cair)
 	=> estratégia 
-	- a tendência inicia e pode acelerar, desacelerar, vai acompanhando e marcando as linhas, nao precisa apagar. Mas sempre trace a tendência a partir do dia com maior volume
+	- a tendência inicia e pode acelerar, desacelerar... vai acompanhando e marcando as linhas, nao precisa 
+	  apagar. Mas sempre trace a tendência a partir do dia com maior volume
 	- a tendência é o que o institucional está fazendo 
 	- tendência sempre é (de alta no caso): 
 		1 fundo abaixo da média diária com volume alto, sempre comece num dia de volume alto 
 		2 topo acima da média diária, 
 		3 fundo abaixo da média diária mais alto que o fundo 1, 
 		4 topo acima da média diária mais alto que o topo 2
-	- a ideia é sempre buscar entrar em pontos de convergência entre esses indicadores no sentido das linhas de tendência (que é o que o institucional está fazendo), e sempre observando o volume, tanto do dia, quanto do candle de 10 min que chegou no ponto de convergência
-	- linhas de tendência, máximas, mínimas, 50% de fibo, todos esses pontos, quando estão atrás das médias, formam uma convergência muito forte, especialmente se a média de 21 estiver a frente da média diária
+	- a ideia é sempre buscar entrar em pontos de convergência entre esses indicadores, e no sentido das 
+	  linhas de tendência (que é o que o institucional está fazendo), e sempre observando o volume, tanto 
+	  do dia, quanto do candle de 10 min que chegou no ponto de convergência
+	- linhas de tendência, máximas, mínimas, 50% de fibo, todos esses pontos, quando estão atrás das médias, 
+	  formam uma convergência muito forte, especialmente se a média de 21 estiver a frente da média diária
+	- as vezes, o simples fato de a media de 21 estar acima da de 55 numa tendencia de alta, e o preço 
+	  mergulhar forte na média das mínimas de 55, com a de 21 ainda acima das diárias, e volume alto,
+	  forma um excelente ponto de entrada
 	- o preço cai mas o vwap sobe numa tendência de alta: o mercado fez uma correção e deve voltar a subir
+	- toda discrepancia, nos últimos dois dias, entre a variação do preço e a variação do vwap, tende a ser
+	  corrigida, estabilizada, no dia atual. fique atento a isso
+	- coloque o fibo atual no grafico de 10 minutos e preste muita atenção como ele foi no detalhe. como 
+      foi a relação com a linha de 50%, se teve relação, etc.
  - 60 minutos
-	- uso apenas para monitorar o volume do dia, comparando hora a hora com o dia anterior, identificando como está o volume do dia em relação ao dia anterior, hora a hora
+	- uso apenas para monitorar o volume do dia, comparando hora a hora com o dia anterior, identificando 
+	  como está o volume do dia atual em relação ao dia anterior, hora a hora
 
+
+--isso aqui eh a linha de tendencia, pode apagar
 topo -> media diaria -> topo -> media diaria
 fundo -> media diaria -> fundo -> media diaria
 
+--ok
 precisamos achar pontos de convergencia de indicadores. sempre usamos o volume com outra coisa, tipo 
 um 50% de fibo, uma minima ou maxima, e isso eh bom. vamos tentar listar as convergencias dentro 
 de tudo que trabalhamos, e buscar por elas no grafico. essa eh uma otima ideia no sentido de padronizar
 nosso operacional
  - divergencias 
+    --ok
 	- preço sobe no diário, mas cai no preço medio ponderado por volume VWAP
  - convergencias 
+    --ok
 	- grafico diario, a maxima do dia anterior esta acima da media de maximas semanal (5) numa tendencia 
 	  de baixa. vamos ter uma super resistencia nesse ponto. se o preço bate la com volume, no inicio do 
 	  dia, vai dar venda intensa e rapida
+	--ok
 	- grafico de 10 min, tendencia de alta, media de 21 acima da media diaria (55), preço desce rapido e 
 	  pega a media de 55 com a media de 21 ainda acima da 55. preço tende forte a reagir na media de 55
+	--ok
 	- grafico de 10 min, pegar uma maxima, ou minima, ou 50% de fibo, ou fechamento, do dia anterior ou 
 	  o penultimo dia, qualquer um desses pontos, logo atras de uma media, seja a diaria de 55 ou a de 21
+	--ok
 	- teste: pega o VWAP do dia anterior e coloca ele no grafico de 10 min e coloque o fibo e veja se 
 	  tira alguma informacao disso 
 
+--ok isso eh a linha de tendencia 
 temos sempre um movimento principal e movimentos secundarios dentro do principal. sempre trabalhe 
 no sentido do movimento principal!! destaque ele no grafico!! 
 
+--ok
 vamos considerar o movimento principal o penultimo movimento, de dois dias.. vamos buscar trabalhar 
 sempre no sentido do penultimo movimento, desde que o penultimo e o anti-penultimo estejam no mesmo
 sentido 
 
+--ok
 sempre trace uma linha de tendencia nos movimentos... estamos trabalhando sempre com movimentos de 
 dois dias, as vezes 3... mas a linha de tendencia eh uma fonte a mais de informacao, e boa 
 
+--isso aqui merece mais analise 
 se o preço desloca no mesmo sentido do vwap, mas mais que o preço medio vwap, provavelmente mercado vai buscar uma correção? parece q sim...
 se o preço desloca menos que o preço medio vwap, mercado acumulou? parece q sim
 
+--ok
 presta atencao pois as vezes vc tem dois movimentos pra baixo, mas o ultimo esta mais alto que o primeiro.
 tipo o topo e o fundo do segundo movimento estao mais altos que os do primeiro. sao dois movimentos de 
 baixa mas isso eh incoerente.
 
+--ok
 monte o movimento sempre com o maior movimento no primeiro dia e o menor movimento no segundo... assim
 a gente foca mais em quando o volume voltar, entende?
 
+--ok
 coloque o fibo atual no grafico de 10 minutos e preste muita atenção como ele foi no detalhe. como 
 foi a relação com a linha de 50%, se teve relação, etc.
 
+--isso aqui soh vale pra dias de tendencia muito forte
 uma coisa muito interessante eh pegar um dia onde o volume sobe, e no dia seguinte, assim que o dia atual
 rompe o limite maximo ou minimo do dia anterior onde o volume subiu, e recua no sentido contrario, 
 começamos a procurar oportunidade de entrar, pois sabemos que no 50% do fibo do dia anterior combinado
 com o dia atual, vai ter muita resistencia, visto que o dia anterior subiu o volume. com isso da pra
 fazer isso varias entradas 
 
+--merece maior analise 
 tendencia de alta no movimento principal, abrindo acima da media, compra, pois a media vai ser um 
 bom ponto de resistencia (media diaria digo)
 
+--ok
 tonto: a tendencia principal eh pra onde os dois ultimos movimentos foram. movimento eh um dia com alto 
 volume, seguido de um dia de volume menor. a tendencia principal eh o que o institucional esta fazendo.
 
@@ -103,7 +135,7 @@ volume, seguido de um dia de volume menor. a tendencia principal eh o que o inst
    do candle anterior, dentro de uma tendencia de baixa, e nao acelera pra baixo, a tendencia morreu ou 
    esta morrendo! olhe isso muito bem!
 	comprando
- - nos dias q ta caindo muito, fique de olho na media diaria no grafico de 10 minutos. costuma ser uma boa 
+ - nos dias q ta subindo muito, fique de olho na media diaria no grafico de 10 minutos. costuma ser uma boa 
    oportunidade para entrar no mercado, especialmente quando a media de 21 (210 minutos) está acima das 
    médias diárias (na alta) e o preço desce RAPIDO e troca as medias diarias (agulhada do didi?) eh uma 
    otima oportunidade de compra
@@ -112,12 +144,13 @@ volume, seguido de um dia de volume menor. a tendencia principal eh o que o inst
    especialmente nas primeiras horas, se o volume do dia esta subindo ou descendo em relacao ao volume
    hora a hora do dia anterior
  - estou olhando onde, de acordo com o q mapeei previamente sobre o institucional, o volume deve subir
-   em na direcao do institucional. se o preço esta subindo e um dia d0 pega a minima de d-1
+   na direcao do institucional. se o preço esta subindo e um dia d0 pega a minima de d-1
    o volume precisa subir e reagir forte pra cima. 
    no grafico de 10 min estou olhando o comportamento de d-1 em relacao a d-2, especialmente 
    como o preco se comporta ao bater numa maxima ou minima de d-2... reagiu de acordo com a tendencia??
    com volume??
- - o preço subiu ate o topo do dia anterior antes de meio dia, que é onde o volume mais importa,
+ - numa tendencia de baixa, o preço subiu ate o topo do dia anterior antes de meio dia, 
+   que é onde o volume mais importa,
    (excelente lugar para os vendedores) e nao fez uma nova minima 
    no dia atual. Vendedores estao fracos. Use as marcacoes de maxima, minima e fechamento de d-2. veja 
    como d-1 se comportou em relacao a essas marcas. d-0 deve ser uma continuacao de d-1 que eh uma continuacao
@@ -160,10 +193,13 @@ tool 2 - regioes de virada de preço
 
 tool 3 - disparos em tendencia 
 o mercado qdo em tendencia tem dia que dispara na abertura e tem dia que ele faz um mergulho
-ele costuma disparar na abertura quando no dia anterior ele vai na minima (ou proximo dela) do penultimo dia e sobe de novo COM VOLUME (caso de alta)
-repare isso, quando tem muitos dias que ele nao pega a minima do dia anterior, espere, pois ele vai fazer isso uma hora
+ele costuma disparar na abertura quando no dia anterior ele vai na minima (ou proximo dela) do penultimo 
+dia e sobe de novo COM VOLUME (caso de alta)
+repare isso, quando tem muitos dias que ele nao pega a minima do dia anterior, espere, pois ele vai fazer 
+isso uma hora
 e quando ele fizer, entre!
 
+--ok
 tool 4 - linhas de tendencia 
 use linhas de tendencia... elas sozinhas nao sao nada, como tudo no trade sozinho nao eh nada
 mas elas sao uma fonte a mais de informacao sempre. pegue o pico do movimento atual no grafico de 1 h
@@ -173,6 +209,7 @@ sempre saindo da origem do movimento e passando pelo ultimo cruzamento da media 
  - marque projecoes de fibonacci no diario pegando movimentos de tendencia, ou seja, movimentos onde
 	os dias vao fazendo topos e fundos maiores sequencialmente (ou menores se for queda)
 
+--nao estou usando isso
 *tool 6 - fique atendo ao ultimo movimento na tendencia. as vezes o preço inverte a tendencia mas faz 
 isso dentro do ultimo movimento da tendencia anterior. Tem que esperar ele sair do ultimo movimento 
 da tendencia anterior, COM VOLUME, antes de apostar na nova tendencia. voce pode considerar o movimento
@@ -198,7 +235,7 @@ quando o volume desce o mercado nao esta na posição que eles querem e eles est
 quando o mercado volta a posição ideal, o volume sobe novamente 
 e esse ciclo se repete 
 
-sempre sempre espere o primeiro candle do grafico de 10 minutos e olho o volume dele... se ele veir abaixo dos ultimos 3 dias, espere!! esse candle nao pode vir sem volume num dia normal
+sempre sempre espere o primeiro candle do grafico de 60 minutos e olho o volume dele... se ele veir abaixo dos ultimos 3 dias, espere!! esse candle nao pode vir sem volume num dia normal
 
 ---------------------------------------------------------------------------------------------------------
 to ana c
