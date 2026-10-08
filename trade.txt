@@ -1,47 +1,41 @@
 last trade
-1106
+0408
+
+pegue a tendencia pelo diario considerando maximas e minimas ascendentes ou descendentes. e no grafico de 5 min, medindo as variações a partir da abertura de cada dia, messa a força da tendencia 
+
+fique de olho nos pontos chaves, por exemplo, o comprador perdeu força no dia anterior, e hoje o preço abriu e tocou rapido a máxima do dia anterior, é uma oportunidade de vender
+
+nao tem como escapar do volume.. tem que olhar sempre o volume no grafico de 60 min comparando com o dia anterior, pra saber se no dia atual o volume ta subindo ou nao
+
+trabalhar sempre tendo como referencia a ultima expansao de volume, considerando maxima e minima de um dia. e veja se a expansao foi de venda ou compra. busque operar no sentido da ultima expansao. veja o que houve quando o volume subiu no mesmo sentido.
+
+VOCE ESTA ACOSTUMADO A TRABALHAR TODOS OS DIAS. E TRABALHAR NORMALMENTE SIGNIFICA FAZER ALGUMA COISA. E OBSERVAR NORMALMENTE NAO EH CONSIDERADO, NAO EH PERCEBIDO COMO SE FAZENDO ALGUMA COISA. VOCE SENTE TRABALHANDO QUE GANHA DINHEIRO TODOS OS DIAS. E VOCE QUER REPLICAR ISSO NO TRADE. PARA SE DAR BEM NO TRADE VC PRECISA SE ACOSTUMAR AO OCIO. NA GRANDE MAIORIA DOS DIAS NAO HA O QUE FAZER. VOCE PODE ABSERVAR. MAS COMO LIDAR COM A ANSIEDADE, VENDO O MERCADO IR PARA UM LADO, PARA O OUTRO, E VOCE NAO FAZENDO NADA?
 
 ctrl + p = volume por preço 
 vwap = volume weighted average price = somatoria(preco x volume) / volume
 
-teste: quando surgir uma tendencia (ao redor da media diaria) marque ela. se ela for de baixa, vc vai 
-marcar inicialmente os topos. Copie e cole a linha de tendencia que ligou os topos e coloque ela no 
-fundo do movimento. se o preço superar a linha dos topos, faça outra copia da linha de tencencia e a 
-coloque nesse novo topo. assim vc cria um corredor de linhas de tendencia de 3 linhas. a do meio, que 
-eh a inicial, a de baixo que eh a do fundo, e a de cima que eh a do topo. se vc começa a arrastar
-essas linhas externas pra direita, significa que a tendencia ta perdendo força. se vc começa a arrastar
-essas linhas externas pra esquerda, significa q a tendencia ta ganhando força. ou se a tendencia eh 
-de baixa e vc ta arrastando as linhas externas pra baixo, a tendencia ta ganhando força. se vc ta
-arrastando as linhas externas (na do meio vc nao mexe) para cima, a tendencia ta perdendo força.
-
-teste: cerca o movimento do dia anterior, o movimento de maior volume no grafico de 10 min. cerque com duas
-linhas, o inicio e o fim do movimento. no dia atual, busque atuar quando o volume subir muito nessa area.
-
-teste: eh muito comum o primeiro dia apos uma mudanca de tendencia corrigir forte no sentido da tendencia
-anterior. Muitas vezes isso acontece porque a tendencia anterior nao acabou. o que voce tem eh uma 
-tendencia dentro de outra. tem que prestar atenção.
-
-teste: tendencia sempre surge ou em topos ou em fundos do diário. se surgiu num topo, tendencia de baixa
-no caso, enquanto o mercado nao formar uma tendencia de alta alem do topo do ultimo movimento de baixa da 
-tendencia (topo acima da media diaria seguido de novo fundo mais baixo que o anterior) nao podemos dizer 
-que ele está em alta. pode ate ter uma tendencia de alta dentro da tendencia de baixa, mas nunca se esqueça, 
-a tendencia eh de baixa enquanto nao tiver dois novos topos além do topo do ultimo movimento de baixa.
-
-outro ponto importante sobre tendencia. se estava em alta e inverteu, cuidado com a media semanal de 
-minima!! tente nao vender antes do preço testar essa média pois ela é muito forte.
-
-pense sempre como comprador. 
-1. eu quero comprar. 
-2. esse preço ta bom? 
-	 - as vezes mesmo com o presso nao interessante, alguem grande precisa comprar. entao vc tem um movimento
-	de alta, mas que nao se consolida. tipo, ao se obter 50% de descontro (considerando o preço minimo
-	do movimento zero e o preço maximo do movimento (fibo)) o volume nao sobe, não há reação no mercado.
-	 - quanto pior o mercado, mais descontos o comprador vai exigir. portanto, 50% de desconto é para
-	um mercado bom, 38% de desconto para um mercado ótimo, 62% ou mais de desconto para um mercado 
-	em queda, ruim e tal.
-3. o que o mercado esta achando desse preço? (volume). 
-4. NAO TENHA PRESSA! o mercado nao é louco. ele não vai rasgar direto num sentido. ele para, espera o 
-   desconto, retoma. Nao tem motivo pra entrar na abertura!!!
+check list NAO PODE ERRAR
+----------------------------------------------------------------------------------------------------------
+o que as minimas e maximas diarias estao me dizendo no grafico diario? pelo menos 3 dias
+	me dao tendencia de alta que parou nos dois ultimos dias
+o que o volume diario esta me dizendo?
+	subiu no inicio da tendencia 6 dias atras e subiu dois dias atrás destruindo completamente a alta do inicio do dia. ontem volume diminuiu mas o mercado novamente fez uma alta no inicio do dia e perdeu tudo em seguida
+o que a variação de preço, pra cima e pra baixo, sempre a partir da abertura, no grafico de 10 min, está me dizendo? pelo menos 3 dias
+	cheque as ultimas 3 altas. teve padrão?
+		as altas estao diminuindo e sendo completamente revertidas, em dias de volume e em dias sem
+	chegue as ultimas 3 baixas. teve padrão?
+		as baixas vem diminuindo, mas revertendo todas as altas
+	depois que bateu a maxima os vendedores cresceram?
+		vem revertendo completamente depois da maxima
+	depois que bateu a minima os compradores cresceram? com volume?
+		nao houve reação a partir da minima, cuidado com os compradores
+	quem saiu mais forte no dia anterior? quem venceu?
+		vendedores 
+	se o preço deslocar rapido hoje até o fechamento/minima/maxima é uma boa oportunidade para o vencedor do dia anterior voltar a atuar?
+		temos que ver a abertura
+como escapar de dias bosta, com baixo volume, que seguem em uma direção devagar e sem parar? isso normalmente vem depois de dias com amplo domínio de um dos lados. temos risco de um dia bosta?
+	nao
+----------------------------------------------------------------------------------------------------------
 
 setup
  - diario
@@ -57,7 +51,7 @@ setup
 	- ponto de entrada: linha de fibo atrás de uma das médias semanais 
 	- ponto de entrada: máxima ou mínima do dia anterior atrás de uma das médias semanais 
  - 10 minutos 
-	- fibonacci no último dia, ou nos dois últimos dias, os nos mesmos dias do grafico diário
+	- fibonacci no último dia, ou nos dois últimos dias, ou nos mesmos dias do grafico diário
 	- uma linha no último fechamendo outra no penúltimo fechamento 
 	- uma linha no último vwap outra no penúltimo vwap
 	- linhas de tendência, sempre partindo do dia de maior volume ou de um candle num extremo do diário 
